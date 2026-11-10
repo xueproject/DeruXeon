@@ -191,6 +191,60 @@
   margin-left: 4px; color: #fff;
 }
 .badge-verified svg { width: 10px; height: 10px; stroke-width: 4; }
+    /* SOCIAL CSS */
+.subtabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; }
+.subtab { flex-shrink: 0; padding: 9px 16px; border-radius: 10px; border: var(--card-border); background: var(--card-bg); color: var(--ink); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; box-shadow: var(--shadow-comic-sm); }
+.subtab.active { background: var(--pop-yellow); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); color: #111; }
+
+.composer { background: var(--card-bg); border: var(--card-border); border-radius: 14px; box-shadow: var(--shadow-comic-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.composer-row { display: flex; gap: 10px; }
+.composer-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-blue); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.1rem; color: #111; flex-shrink: 0; }
+.composer textarea { flex: 1; padding: 10px; border-radius: 10px; border: var(--card-border); background: var(--paper-dark); color: var(--ink); outline: none; resize: none; min-height: 44px; }
+.composer-actions { display: flex; justify-content: space-between; align-items: center; }
+.composer-media-btns { display: flex; gap: 6px; }
+.media-btn { width: 34px; height: 34px; border-radius: 8px; background: var(--card-bg); border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center; color: var(--ink); }
+.media-btn svg { width: 16px; height: 16px; }
+.btn-post { padding: 8px 20px; border-radius: 10px; background: var(--pop-yellow); border: var(--card-border); box-shadow: var(--shadow-comic-sm); font-family: var(--font-display); font-size: 1rem; color: #111; }
+.btn-post:disabled { opacity: 0.5; }
+
+.media-preview { position: relative; border-radius: 10px; overflow: hidden; border: 2px solid var(--ink); max-height: 200px; }
+.media-preview img, .media-preview video { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.remove-media { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--pop-red); border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; }
+
+.post { background: var(--card-bg); border: var(--card-border); border-radius: 14px; box-shadow: var(--shadow-comic-sm); margin-bottom: 12px; overflow: hidden; color: var(--ink); }
+.post-head { display: flex; align-items: center; gap: 10px; padding: 12px; }
+.post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-pink); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.1rem; color: #111; flex-shrink: 0; }
+.post-info { flex: 1; min-width: 0; }
+.post-name { font-weight: 800; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-meta { font-size: 0.65rem; color: var(--color-text-muted); }
+.post-body { padding: 0 12px 10px; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; }
+.post-body .hashtag { color: var(--pop-blue); font-weight: 800; }
+.post-media img, .post-media video { width: 100%; max-height: 400px; object-fit: cover; display: block; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); margin-top: 8px; }
+
+.user-list { display: flex; flex-direction: column; gap: 8px; }
+.user-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card-bg); border: var(--card-border); border-radius: 12px; box-shadow: var(--shadow-comic-sm); cursor: pointer; color: var(--ink); }
+.user-avatar-sm { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-purple); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); color: #111; }
+.user-name-sm { font-weight: 800; font-size: 0.85rem; }
+.user-sub-sm { font-size: 0.65rem; color: var(--color-text-muted); }
+
+.chat-view { display: flex; flex-direction: column; height: calc(100dvh - var(--nav-height) - 180px); background: var(--card-bg); border: var(--card-border); border-radius: 14px; overflow: hidden; }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--pop-blue); color: #111; border-bottom: var(--card-border); }
+.chat-back { background: rgba(0,0,0,0.1); width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.chat-back svg { width: 16px; height: 16px; }
+.chat-name { font-weight: 800; font-size: 0.9rem; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--paper-dark); }
+.msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; border: 2px solid var(--ink); }
+.msg.me { align-self: flex-end; background: var(--pop-yellow); color: #111; border-bottom-right-radius: 4px; }
+.msg.them { align-self: flex-start; background: var(--card-bg); color: var(--ink); border-bottom-left-radius: 4px; }
+.msg-time { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; }
+.chat-input { display: flex; gap: 8px; padding: 10px; border-top: var(--card-border); background: var(--card-bg); }
+.chat-input input { flex: 1; padding: 10px; border-radius: 20px; border: var(--card-border); background: var(--paper-dark); color: var(--ink); outline: none; }
+.chat-send { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-yellow); border: var(--card-border); color: #111; display: flex; align-items: center; justify-content: center; }
+
+.empty-state { padding: 30px; text-align: center; border: 2px dashed var(--color-text-muted); border-radius: 14px; font-size: 0.8rem; color: var(--color-text-muted); }
+.search-wrap { position: relative; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--color-text-muted); }
+.search-input { width: 100%; padding: 12px 12px 12px 40px; border-radius: 10px; border: var(--card-border); background: var(--card-bg); color: var(--ink); outline: none; }
   </style>
 </head>
 <body>
@@ -756,7 +810,243 @@ document.getElementById('greetTitle').innerHTML = `Halo, ${nameHtml}!`;
 
       hideLoading();
     }
+/* ============================================================
+   LOGIC SOSIAL (FEED, CHAT, SEARCH)
+   ============================================================ */
+let selectedMedia = null;
+let activeChatUser = null;
+let searchTimeout;
 
+// --- SUBTABS ---
+document.querySelectorAll('#socialSubtabs .subtab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#socialSubtabs .subtab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const target = t.dataset.subtab;
+    document.getElementById('sub-feed').classList.toggle('hidden', target !== 'feed');
+    document.getElementById('sub-chat').classList.toggle('hidden', target !== 'chat');
+    document.getElementById('sub-search').classList.toggle('hidden', target !== 'search');
+  });
+});
+
+// --- FEED ---
+const composerText = document.getElementById('composerText');
+const btnPost = document.getElementById('btnPost');
+const mediaPreviewWrap = document.getElementById('mediaPreviewWrap');
+
+function updatePostBtn() {
+  btnPost.disabled = !(composerText.value.trim() || selectedMedia);
+}
+
+composerText.addEventListener('input', () => {
+  composerText.style.height = 'auto';
+  composerText.style.height = Math.min(composerText.scrollHeight, 120) + 'px';
+  updatePostBtn();
+});
+
+document.getElementById('btnAddPhoto').addEventListener('click', () => document.getElementById('filePhoto').click());
+document.getElementById('btnAddVideo').addEventListener('click', () => document.getElementById('fileVideo').click());
+
+document.getElementById('filePhoto').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 2*1024*1024) return toast('Foto maks 2MB', 'error');
+  const r = new FileReader();
+  r.onload = () => { selectedMedia = { type: 'image', url: r.result }; renderPreview(); updatePostBtn(); };
+  r.readAsDataURL(f);
+});
+
+document.getElementById('fileVideo').addEventListener('change', (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 5*1024*1024) return toast('Video maks 5MB', 'error');
+  const r = new FileReader();
+  r.onload = () => { selectedMedia = { type: 'video', url: r.result }; renderPreview(); updatePostBtn(); };
+  r.readAsDataURL(f);
+});
+
+function renderPreview() {
+  if (!selectedMedia) { mediaPreviewWrap.innerHTML = ''; return; }
+  const tag = selectedMedia.type === 'image' ? `<img src="${selectedMedia.url}">` : `<video src="${selectedMedia.url}" controls></video>`;
+  mediaPreviewWrap.innerHTML = `<div class="media-preview">${tag}<button class="remove-media" id="rmMedia">✕</button></div>`;
+  document.getElementById('rmMedia').addEventListener('click', () => { selectedMedia = null; renderPreview(); updatePostBtn(); });
+}
+
+btnPost.addEventListener('click', async () => {
+  const text = composerText.value.trim();
+  if (!text && !selectedMedia) return;
+  
+  btnPost.disabled = true; btnPost.textContent = '...';
+  const { error } = await supaClient.from('posts').insert({
+    user_id: currentUser.id,
+    text: text || null,
+    media_type: selectedMedia?.type || null,
+    media_url: selectedMedia?.url || null
+  });
+  
+  btnPost.textContent = 'POST';
+  if (error) return toast('Gagal post: ' + error.message, 'error');
+  
+  composerText.value = ''; composerText.style.height = 'auto'; selectedMedia = null;
+  renderPreview(); updatePostBtn(); toast('Post terkirim!', 'success');
+  loadFeed();
+});
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderHashtags(text) { return escapeHtml(text).replace(/#(\w+)/g, '<span class="hashtag">#$1</span>'); }
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+  if (diff < 60) return 'baru saja';
+  if (diff < 3600) return Math.floor(diff/60) + 'm';
+  if (diff < 86400) return Math.floor(diff/3600) + 'j';
+  return Math.floor(diff/86400) + 'h';
+}
+
+async function loadFeed() {
+  const c = document.getElementById('postsContainer');
+  const { data: posts, error } = await supaClient.from('posts').select('*').order('created_at', { ascending: false }).limit(50);
+  
+  if (error || !posts || posts.length === 0) {
+    c.innerHTML = `<div class="empty-state">Belum ada post. Jadilah yang pertama!</div>`;
+    return;
+  }
+
+  const userIds = [...new Set(posts.map(p => p.user_id))];
+  const { data: profiles } = await supaClient.from('profiles').select('id, nickname').in('id', userIds);
+  const pMap = {}; (profiles||[]).forEach(p => pMap[p.id] = p);
+
+  c.innerHTML = posts.map(post => {
+    const author = pMap[post.user_id]?.nickname || 'User';
+    const media = post.media_url ? (post.media_type === 'image' ? `<div class="post-media"><img src="${post.media_url}"></div>` : `<div class="post-media"><video src="${post.media_url}" controls></video></div>`) : '';
+    return `<div class="post">
+      <div class="post-head">
+        <div class="post-avatar">${author.charAt(0).toUpperCase()}</div>
+        <div class="post-info">
+          <div class="post-name">${escapeHtml(author)}</div>
+          <div class="post-meta">${timeAgo(post.created_at)}</div>
+        </div>
+      </div>
+      <div class="post-body">
+        ${post.text ? renderHashtags(post.text) : ''}
+        ${media}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// --- CHAT ---
+async function loadChatList() {
+  const c = document.getElementById('chatList');
+  const { data: profiles, error } = await supaClient.from('profiles').select('id, nickname, role').neq('id', currentUser.id).limit(30);
+  
+  if (error || !profiles || profiles.length === 0) {
+    c.innerHTML = `<div class="empty-state">Belum ada user lain.</div>`;
+    return;
+  }
+
+  c.innerHTML = profiles.map(p => `
+    <div class="user-row" data-id="${p.id}" data-nick="${escapeHtml(p.nickname)}">
+      <div class="user-avatar-sm">${p.nickname.charAt(0).toUpperCase()}</div>
+      <div class="user-info-sm">
+        <div class="user-name-sm">${escapeHtml(p.nickname)}</div>
+        <div class="user-sub-sm">${p.role || 'user'}</div>
+      </div>
+    </div>
+  `).join('');
+
+  c.querySelectorAll('.user-row').forEach(r => {
+    r.addEventListener('click', () => openChat(r.dataset.id, r.dataset.nick));
+  });
+}
+
+document.getElementById('chatBack').addEventListener('click', () => {
+  document.getElementById('chatView').classList.add('hidden');
+  document.getElementById('chatListView').classList.remove('hidden');
+  activeChatUser = null;
+});
+
+function openChat(id, nick) {
+  activeChatUser = { id, nick };
+  document.getElementById('chatListView').classList.add('hidden');
+  document.getElementById('chatView').classList.remove('hidden');
+  document.getElementById('chatName').textContent = nick;
+  loadMessages();
+}
+
+async function loadMessages() {
+  if (!activeChatUser) return;
+  const c = document.getElementById('chatMessages');
+  const { data: msgs, error } = await supaClient.from('messages')
+    .select('*')
+    .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${activeChatUser.id}),and(sender_id.eq.${activeChatUser.id},receiver_id.eq.${currentUser.id})`)
+    .order('created_at', { ascending: true }).limit(100);
+
+  if (error || !msgs || msgs.length === 0) {
+    c.innerHTML = `<div class="empty-state" style="margin:auto">Belum ada pesan.</div>`;
+    return;
+  }
+
+  c.innerHTML = msgs.map(m => {
+    const isMe = m.sender_id === currentUser.id;
+    const time = new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="msg ${isMe?'me':'them'}">${escapeHtml(m.text)}<div class="msg-time">${time}</div></div>`;
+  }).join('');
+  c.scrollTop = c.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const txt = input.value.trim();
+  if (!txt || !activeChatUser) return;
+  input.value = '';
+  const { error } = await supaClient.from('messages').insert({
+    sender_id: currentUser.id, receiver_id: activeChatUser.id, text: txt
+  });
+  if (error) return toast('Gagal kirim', 'error');
+  loadMessages();
+}
+
+document.getElementById('chatSend').addEventListener('click', sendMessage);
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+// --- SEARCH ---
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  const q = e.target.value.trim();
+  searchTimeout = setTimeout(() => doSearch(q), 400);
+});
+
+async function doSearch(q) {
+  const c = document.getElementById('searchResults');
+  if (!q) { c.innerHTML = `<div class="empty-state">Ketik untuk mencari.</div>`; return; }
+
+  if (q.startsWith('#')) {
+    const tag = q.slice(1);
+    const { data: posts } = await supaClient.from('posts').select('*').ilike('text', `%#${tag}%`).limit(20);
+    if (!posts || posts.length === 0) { c.innerHTML = `<div class="empty-state">Tidak ada #${escapeHtml(tag)}</div>`; return; }
+    c.innerHTML = posts.map(p => `<div class="post"><div class="post-body">${renderHashtags(p.text||'')}</div></div>`).join('');
+  } else {
+    const { data: profiles } = await supaClient.from('profiles').select('id, nickname, role').ilike('nickname', `%${q}%`).limit(20);
+    if (!profiles || profiles.length === 0) { c.innerHTML = `<div class="empty-state">User tidak ditemukan.</div>`; return; }
+    c.innerHTML = `<div class="user-list">` + profiles.map(p => `
+      <div class="user-row" data-id="${p.id}" data-nick="${escapeHtml(p.nickname)}">
+        <div class="user-avatar-sm">${p.nickname.charAt(0).toUpperCase()}</div>
+        <div class="user-info-sm">
+          <div class="user-name-sm">${escapeHtml(p.nickname)}</div>
+          <div class="user-sub-sm">${p.role || 'user'}</div>
+        </div>
+      </div>
+    `).join('') + `</div>`;
+    c.querySelectorAll('.user-row').forEach(r => {
+      r.addEventListener('click', () => {
+        document.querySelectorAll('#socialSubtabs .subtab').forEach(t => t.classList.remove('active'));
+        document.querySelector('[data-subtab="chat"]').classList.add('active');
+        document.getElementById('sub-feed').classList.add('hidden');
+        document.getElementById('sub-search').classList.add('hidden');
+        document.getElementById('sub-chat').classList.remove('hidden');
+        openChat(r.dataset.id, r.dataset.nick);
+      });
+    });
+  }
+    }
     document.addEventListener('DOMContentLoaded', () => {
       boot();
 
