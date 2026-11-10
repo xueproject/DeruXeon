@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FFF8E7">
+  <title>DeruXeon — Masuk</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --pop-yellow: #FFD93D;
+      --pop-pink:   #FF6B9D;
+      --pop-blue:   #4ECDC4;
+      --pop-red:    #FF5252;
+      --pop-purple: #A78BFA;
+      --space-xs: 0.5rem;
+      --space-sm: 1rem;
+      --space-md: 1.5rem;
+      --space-lg: 2.5rem;
+      --font-display: 'Bangers', 'Impact', cursive;
+      --font-body:    'Nunito', system-ui, -apple-system, sans-serif;
+      --app-max-width: 430px;
+      --app-pad: 1.25rem;
+    }
+    :root, [data-theme="light"] {
+      --ink: #1A1A1A;
+      --paper: #FFF8E7;
+      --paper-dark: #F5EBD0;
+      --color-text-muted: #5A5A5A;
+      --border-thick: 3px solid var(--ink);
+      --border-thicker: 4px solid var(--ink);
+      --shadow-comic: 5px 5px 0 var(--ink);
+      --shadow-comic-sm: 3px 3px 0 var(--ink);
+      --halftone: rgba(26,26,26,0.08);
+      --error: #D92D20;
+      --success: #059669;
+    }
+    [data-theme="dark"] {
+      --ink: #F2EDE0;
+      --paper: #15130F;
+      --paper-dark: #221F18;
+      --color-text-muted: #A8A296;
+      --border-thick: 3px solid var(--ink);
+      --border-thicker: 4px solid var(--ink);
+      --shadow-comic: 5px 5px 0 rgba(242,237,224,0.9);
+      --shadow-comic-sm: 3px 3px 0 rgba(242,237,224,0.9);
+      --halftone: rgba(242,237,224,0.06);
+      --error: #FF8A80;
+      --success: #6EE7B7;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(circle at 1px 1px, var(--halftone) 1px, transparent 0);
+      background-size: 12px 12px;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--ink);
+    }
+    p { line-height: 1.7; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    input { font-family: inherit; font-size: inherit; color: inherit; }
+    a, button, [role="button"] { cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--pop-blue); outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    .hidden { display: none !important; }
+
+    .app-shell {
+      width: 100%;
+      max-width: var(--app-max-width);
+      min-height: 100dvh;
+      padding-inline: var(--app-pad);
+      padding-block: var(--space-lg) var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 14px; right: 14px;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--pop-yellow);
+      border: var(--border-thick);
+      box-shadow: var(--shadow-comic-sm);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .theme-toggle:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+    .theme-toggle:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    .theme-toggle svg { width: 22px; height: 22px; color: var(--ink); }
+
+    .back-btn {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: var(--paper);
+      color: var(--ink);
+      border: var(--border-thick);
+      border-radius: 8px;
+      box-shadow: var(--shadow-comic-sm);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .back-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+    .back-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    .brand {
+      display: flex; flex-direction: column;
+      align-items: center; gap: var(--space-sm);
+      text-align: center;
+      margin-top: var(--space-sm);
+    }
+    .brand-logo {
+      width: 88px; height: 88px;
+      border-radius: 16px;
+      background: var(--pop-blue);
+      border: var(--border-thicker);
+      box-shadow: var(--shadow-comic);
+      display: flex; align-items: center; justify-content: center;
+      transform: rotate(-2deg);
+    }
+    .brand-logo svg { width: 46px; height: 46px; color: var(--ink); stroke-width: 2.2; }
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 3.4rem;
+      letter-spacing: 0.04em;
+      text-shadow: 3px 3px 0 var(--pop-yellow);
+      transform: rotate(-1deg);
+      line-height: 1;
+    }
+    .brand-tagline {
+      font-size: 0.75rem; font-weight: 800;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: -4px;
+    }
+
+    .btn-google {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: var(--paper);
+      border: var(--border-thick);
+      box-shadow: var(--shadow-comic-sm);
+      font-weight: 800; font-size: 0.9rem;
+      color: var(--ink);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .btn-google:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+    .btn-google:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn-google svg { width: 20px; height: 20px; }
+
+    .divider {
+      display: flex; align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.7rem; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 2px;
+      background: var(--ink); opacity: 0.2;
+    }
+
+    .auth-form { display: flex; flex-direction: column; gap: var(--space-sm); }
+
+    .field label {
+      display: block;
+      font-size: 0.68rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--ink); margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 10px;
+      border: var(--border-thick);
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.9rem; font-weight: 600;
+      outline: none;
+      box-shadow: var(--shadow-comic-sm);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.15s ease;
+    }
+    .field input::placeholder { color: var(--color-text-muted); opacity: 0.7; }
+    .field input:focus { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--pop-blue); }
+    .field.has-error input { border-color: var(--error); box-shadow: 3px 3px 0 var(--error); }
+
+    .field-error {
+      display: none;
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--error);
+      margin-top: 5px;
+    }
+    .field.has-error .field-error { display: block; }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle {
+      position: absolute;
+      top: 50%; right: 10px;
+      transform: translateY(-50%);
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink);
+    }
+    .pw-toggle svg { width: 18px; height: 18px; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      background: var(--pop-yellow);
+      border: var(--border-thicker);
+      box-shadow: var(--shadow-comic);
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 0.06em;
+      color: #1A1A1A;
+      margin-top: var(--space-xs);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+    }
+    .btn-submit:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+    .btn-submit:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .spinner { width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-note {
+      text-align: center;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+    .auth-note a {
+      font-weight: 800; color: var(--ink);
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink); color: var(--paper);
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.8rem; font-weight: 700;
+      border: var(--border-thick); border-color: var(--paper);
+      box-shadow: var(--shadow-comic-sm);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 200;
+      max-width: calc(100% - 2rem);
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--error); color: #fff; border-color: #fff; }
+    .toast.success { background: var(--success); color: #fff; border-color: #fff; }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+    <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    </svg>
+    <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="hidden">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  </button>
+
+  <div class="app-shell">
+
+    <a href="index.html" class="back-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Kembali
+    </a>
+
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 4h5a8 8 0 0 1 0 16H7z"/>
+          <path d="M17.5 5.5l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/>
+        </svg>
+      </div>
+      <h1 class="brand-title">Masuk</h1>
+      <p class="brand-tagline">Selamat datang kembali</p>
+    </div>
+
+    <button type="button" class="btn-google" id="btnGoogle">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+      </svg>
+      Lanjutkan dengan Google
+    </button>
+
+    <div class="divider">atau masuk dengan email</div>
+
+    <form class="auth-form" id="authForm" novalidate>
+      <div class="field" id="field-email">
+        <label for="fEmail">Email</label>
+        <input id="fEmail" name="email" type="email" autocomplete="email" placeholder="kamu@email.com" required>
+        <span class="field-error" id="err-email"></span>
+      </div>
+
+      <div class="field" id="field-pass">
+        <label for="fPass">Password</label>
+        <div class="pw-wrap">
+          <input id="fPass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Tampilkan password">
+            <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="hidden">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-6.5 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <path d="M1 1l22 22"/>
+            </svg>
+          </button>
+        </div>
+        <span class="field-error" id="err-pass"></span>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span id="btnSubmitText">MASUK</span>
+      </button>
+    </form>
+
+    <p class="auth-note">
+      Belum punya akun? <a href="index.html" id="linkDaftar">Daftar di sini</a>
+    </p>
+
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Supabase SDK (defer) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+  <script>
+    /* ============================================================
+       BAGIAN 1 — UI MURNI (jalan duluan, GAK butuh Supabase)
+       ============================================================ */
+
+    // --- TOAST ---
+    let toastTimer;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000);
+    }
+
+    // --- THEME ---
+    (function themeModule() {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const sun = document.getElementById('iconSun');
+      const moon = document.getElementById('iconMoon');
+      const meta = document.querySelector('meta[name="theme-color"]');
+      const KEY = 'dx_theme';
+
+      function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        sun.classList.toggle('hidden', isDark);
+        moon.classList.toggle('hidden', !isDark);
+        btn.setAttribute('aria-label', isDark ? 'Ganti ke tema terang' : 'Ganti ke tema gelap');
+        if (meta) meta.setAttribute('content', isDark ? '#15130F' : '#FFF8E7');
+      }
+
+      const saved = localStorage.getItem(KEY);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(KEY, next);
+      });
+    })();
+
+    // --- PASSWORD TOGGLE ---
+    (function pwModule() {
+      const btn = document.getElementById('pwToggle');
+      const input = document.getElementById('fPass');
+      const open = document.getElementById('eyeOpen');
+      const close = document.getElementById('eyeClosed');
+
+      btn.addEventListener('click', () => {
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        open.classList.toggle('hidden', show);
+        close.classList.toggle('hidden', !show);
+        btn.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+      });
+    })();
+
+    // --- VALIDASI ---
+    const validators = {
+      email(v) {
+        if (!v) return 'Email wajib diisi.';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Format email tidak valid.';
+        return '';
+      },
+      pass(v) {
+        if (!v) return 'Password wajib diisi.';
+        if (v.length < 6) return 'Password minimal 6 karakter.';
+        return '';
+      }
+    };
+
+    const fieldMap = {
+      email: { input: 'fEmail', field: 'field-email', err: 'err-email' },
+      pass:  { input: 'fPass',  field: 'field-pass',  err: 'err-pass'  }
+    };
+
+    function setFieldError(key, msg) {
+      const m = fieldMap[key];
+      if (!m) return;
+      const field = document.getElementById(m.field);
+      const err = document.getElementById(m.err);
+      if (msg) {
+        field.classList.add('has-error');
+        err.textContent = msg;
+        err.style.display = 'block';
+      } else {
+        field.classList.remove('has-error');
+        err.textContent = '';
+        err.style.display = 'none';
+      }
+    }
+
+    function validateField(key, value) {
+      const msg = validators[key](value);
+      setFieldError(key, msg);
+      return !msg;
+    }
+
+    // --- LIVE VALIDATION ---
+    Object.keys(fieldMap).forEach(key => {
+      const input = document.getElementById(fieldMap[key].input);
+      input.addEventListener('input', () => {
+        if (input.closest('.field').classList.contains('has-error')) {
+          validateField(key, key === 'pass' ? input.value : input.value.trim());
+        }
+      });
+      input.addEventListener('blur', () => {
+        const raw = key === 'pass' ? input.value : input.value.trim();
+        if (raw) validateField(key, raw);
+      });
+    });
+
+
+    /* ============================================================
+       BAGIAN 2 — SUPABASE (jalan terpisah, di-guard)
+       ============================================================ */
+
+    const SUPABASE_URL      = 'https://lxdjnzsbunkkwjkltabt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_W9AFHz0Z3M0YhpVRgLsbbQ_L8iUd-q1';
+
+    // PENTING: pakai nama berbeda dari global SDK, biar gak bentrok
+    let supaClient = null;
+    let supaReady  = false;
+
+    // Init Supabase — return Promise, gak throw
+    function initSupa() {
+      return new Promise((resolve) => {
+        if (supaReady && supaClient) { resolve(true); return; }
+
+        // Cek SDK ready (polling)
+        let tries = 0;
+        const maxTries = 80; // 8 detik
+        const timer = setInterval(() => {
+          tries++;
+
+          // SDK siap?
+          if (window.supabase && typeof window.supabase.createClient === 'function') {
+            clearInterval(timer);
+            try {
+              // Simpan di nama lokal, JANGAN timpa window.supabase
+              supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+              supaReady = true;
+              console.log('[DeruXeon] Supabase ready.');
+              resolve(true);
+            } catch (e) {
+              console.error('[DeruXeon] createClient error:', e);
+              toast('Supabase error: ' + e.message, 'error');
+              resolve(false);
+            }
+            return;
+          }
+
+          if (tries >= maxTries) {
+            clearInterval(timer);
+            console.error('[DeruXeon] Supabase SDK timeout.');
+            toast('Koneksi ke server gagal (SDK timeout).', 'error');
+            resolve(false);
+          }
+        }, 100);
+      });
+    }
+
+    // Init di background — UI tetap jalan walau ini gagal
+    initSupa().then(ok => {
+      if (ok) {
+        // Cek session: kalau udah login, redirect ke dashboard
+        supaClient.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            console.log('[DeruXeon] Session ditemukan, redirect...');
+            window.location.href = 'dashboard.html';
+          }
+        }).catch(e => console.warn('[DeruXeon] getSession:', e));
+      }
+    });
+
+
+    /* ============================================================
+       BAGIAN 3 — SUBMIT LOGIN
+       ============================================================ */
+
+    (function loginModule() {
+      const form = document.getElementById('authForm');
+      const btnSubmit = document.getElementById('btnSubmit');
+      const btnText = document.getElementById('btnSubmitText');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (btnSubmit.disabled) return;
+
+        const email = form.email.value.trim();
+        const pass  = form.password.value;
+
+        const okEmail = validateField('email', email);
+        const okPass  = validateField('pass', pass);
+        if (!okEmail || !okPass) {
+          toast('Periksa kembali data kamu.', 'error');
+          return;
+        }
+
+        // Cek Supabase ready
+        if (!supaReady || !supaClient) {
+          toast('Server belum siap. Tunggu sebentar lalu coba lagi.', 'error');
+          // coba init ulang
+          initSupa();
+          return;
+        }
+
+        // Loading
+        btnSubmit.disabled = true;
+        btnText.textContent = 'MEMPROSES…';
+        const spinner = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        spinner.setAttribute('class','spinner');
+        spinner.setAttribute('viewBox','0 0 24 24');
+        spinner.innerHTML = '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>';
+        btnSubmit.prepend(spinner);
+
+        try {
+          const { data, error } = await supaClient.auth.signInWithPassword({
+            email: email,
+            password: pass
+          });
+
+          if (error) {
+            const msg = error.message.toLowerCase();
+            if (msg.includes('invalid login') || msg.includes('invalid credentials') || msg.includes('email not confirmed')) {
+              setFieldError('pass', 'Email atau password salah.');
+              toast('Email atau password salah.', 'error');
+            } else if (msg.includes('rate limit') || msg.includes('too many')) {
+              toast('Terlalu banyak percobaan. Tunggu sebentar.', 'error');
+            } else {
+              toast('Gagal masuk: ' + error.message, 'error');
+            }
+            return;
+          }
+
+          toast('Berhasil masuk! Mengalihkan…', 'success');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 900);
+
+        } catch (err) {
+          console.error('[DeruXeon] Login error:', err);
+          toast('Error: ' + (err.message || 'jaringan bermasalah'), 'error');
+        } finally {
+          spinner.remove();
+          btnSubmit.disabled = false;
+          btnText.textContent = 'MASUK';
+        }
+      });
+
+      // Google OAuth
+      document.getElementById('btnGoogle').addEventListener('click', async () => {
+        if (!supaReady || !supaClient) {
+          toast('Server belum siap. Tunggu sebentar.', 'error');
+          initSupa();
+          return;
+        }
+        try {
+          const { error } = await supaClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.href.split('#')[0] }
+          });
+          if (error) {
+            const msg = error.message.toLowerCase();
+            if (msg.includes('provider') && msg.includes('not enabled')) {
+              toast('Google login belum diaktifkan di Supabase.', 'error');
+            } else {
+              toast('Google login gagal: ' + error.message, 'error');
+            }
+          }
+        } catch (err) {
+          console.error('[DeruXeon] Google error:', err);
+          toast('Google OAuth error.', 'error');
+        }
+      });
+
+      // Link daftar — biar default href (index.html) jalan
+      document.getElementById('linkDaftar').addEventListener('click', () => {});
+    })();
+  </script>
+</body>
+</html>
