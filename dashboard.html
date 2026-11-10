@@ -254,10 +254,91 @@
         <div class="section-block"><div class="section-body">Menu Social (Feed & Chat) menyusul.</div></div>
       </section>
 
-      <!-- SETTINGS -->
+            <!-- SETTINGS -->
       <section class="screen-panel" data-screen="settings">
         <h1 class="page-title">Setting</h1>
         
+        <!-- PROFIL CARD -->
+        <div class="menu-card">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+            <!-- PP PLACEHOLDER -->
+            <div class="topbar-avatar" style="width:60px; height:60px; font-size:1.8rem;" id="ppAvatar">?</div>
+            <div>
+              <div style="font-size:1.1rem; font-weight:800;" id="setNicknameDisplay">Nickname</div>
+              <div style="font-size:0.75rem; color:var(--color-text-muted);">@<span id="setUsername">username</span></div>
+            </div>
+          </div>
+          
+          <div class="setting-row">
+            <span class="setting-label">Nickname</span>
+            <!-- Form edit nickname -->
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="text" id="inputNickname" style="padding:6px 10px; border-radius:6px; border:1px solid var(--color-text-muted); background:var(--paper); color:var(--ink); font-size:0.8rem; width:120px;" placeholder="Nickname">
+              <button class="btn-sm" id="btnSaveNickname" style="padding:6px 10px; border-radius:6px; background:var(--pop-blue); border:none; font-weight:800; font-size:0.75rem; color:#111;">SAVE</button>
+            </div>
+          </div>
+          
+          <div class="setting-row">
+            <span class="setting-label">Username</span>
+            <span class="setting-value" style="display:flex; align-items:center; gap:4px;">
+              <span id="lockedUsername">username</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px; height:12px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+          </div>
+          
+          <div class="setting-row">
+            <span class="setting-label">Email</span>
+            <span class="setting-value" id="setEmail">—</span>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">Role</span>
+            <span class="setting-value" id="setRole">—</span>
+          </div>
+        </div>
+
+        <!-- API SILIT CARD -->
+        <div class="menu-card">
+          <h3>API SILIT</h3>
+          <p>Jangan bagikan kode ini ke siapapun.</p>
+          
+          <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:6px; border-bottom:none;">
+            <span class="setting-label">API Key</span>
+            <div style="width:100%; padding:10px; background:var(--paper-dark); border-radius:8px; font-family:monospace; font-size:0.8rem; word-break:break-all; color:var(--pop-blue); font-weight:800;" id="apiKeyText">
+              Memuat...
+            </div>
+          </div>
+          
+          <div class="setting-row" style="border-bottom:none; padding-top:0;">
+            <span class="setting-label">IP Pengguna</span>
+            <span class="setting-value" id="apiIpText">—</span>
+          </div>
+        </div>
+
+        <!-- THEME SELECTOR (Yang udah kita buat) -->
+        <div class="menu-card">
+          <h3>Ganti Tema</h3>
+          <p>Pilih tampilan sesuai selera lo.</p>
+          <div class="theme-options" id="themeOptions">
+            <button class="theme-btn" data-set-theme="classic"><div class="theme-preview classic"></div>Classic</button>
+            <button class="theme-btn" data-set-theme="blueglass"><div class="theme-preview blueglass"></div>Blue Glass</button>
+            <button class="theme-btn" data-set-theme="imyut" data-premium="true">
+              <div class="theme-preview imyut"></div>ImYut
+              <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </button>
+            <button class="theme-btn" data-set-theme="comic" data-premium="true">
+              <div class="theme-preview comic"></div>Comic Paper
+              <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- LOGOUT -->
+        <button class="menu-btn danger" id="btnLogout2" style="margin-top:10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </section>
         <!-- THEME SELECTOR -->
         <div class="menu-card">
           <h3>Ganti Tema</h3>
@@ -551,7 +632,56 @@
       document.getElementById('setNickname').textContent = nickname;
       document.getElementById('setEmail').textContent = currentUser.email || '—';
       document.getElementById('setRole').textContent = userRole.toUpperCase();
+      // --- SETUP USERNAME & NICKNAME ---
+      const rawEmail = currentUser.email || 'user@mail.com';
+      const username = rawEmail.split('@')[0];
+      document.getElementById('setUsername').textContent = username;
+      document.getElementById('lockedUsername').textContent = username;
+      
+      document.getElementById('ppAvatar').textContent = nickname.charAt(0).toUpperCase();
+      document.getElementById('setNicknameDisplay').textContent = nickname;
+      document.getElementById('inputNickname').value = nickname;
 
+      // --- API SILIT GENERATOR ---
+      // Generate random 6 digit
+      let storedApi = localStorage.getItem('dx_api_key');
+      if (!storedApi) {
+        const randomDigits = Math.floor(100000 + Math.random() * 900000);
+        storedApi = `DERU_MEMBER_XEON${randomDigits}-DX-ON`;
+        localStorage.setItem('dx_api_key', storedApi);
+      }
+      document.getElementById('apiKeyText').textContent = storedApi;
+
+      // IP Pengguna (Fake IP dulu karena gak bisa dapet real IP tanpa API)
+      // Nanti bisa diganti pake API ipify kalau mau real
+      document.getElementById('apiIpText').textContent = `103.152.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+
+      // --- LOGIC SAVE NICKNAME ---
+      document.getElementById('btnSaveNickname').addEventListener('click', async () => {
+        const newNick = document.getElementById('inputNickname').value.trim();
+        if (!newNick || newNick.length < 3) { toast('Nickname minimal 3 huruf', 'error'); return; }
+        
+        const btn = document.getElementById('btnSaveNickname');
+        btn.textContent = '...';
+        
+        const { error } = await supaClient
+          .from('profiles')
+          .update({ nickname: newNick })
+          .eq('id', currentUser.id);
+          
+        btn.textContent = 'SAVE';
+        
+        if (error) {
+          toast('Gagal update: ' + error.message, 'error');
+        } else {
+          toast('Nickname berhasil diubah!', 'success');
+          document.getElementById('userName').textContent = newNick;
+          document.getElementById('greetTitle').textContent = `Halo, ${newNick}!`;
+          document.getElementById('setNicknameDisplay').textContent = newNick;
+          document.getElementById('ppAvatar').textContent = newNick.charAt(0).toUpperCase();
+          document.getElementById('userAvatar').textContent = newNick.charAt(0).toUpperCase();
+        }
+      });
       // Init Themes setelah role diketahui
       initTheme();
       wireThemeButtons();
@@ -567,11 +697,18 @@
         window.location.href = 'silence.html';
       });
 
-      document.getElementById('btnLogout').addEventListener('click', async () => {
+            // --- LOGOUT LOGIC (Untuk 2 tombol) ---
+      const doLogout = async () => {
         if (!supaClient) return;
         await supaClient.auth.signOut();
         window.location.href = 'login.html';
-      });
+      };
+      
+      // Tombol logout di Topbar
+      document.getElementById('btnLogout').addEventListener('click', doLogout);
+      
+      // Tombol logout di Menu Setting (btnLogout2)
+      document.getElementById('btnLogout2').addEventListener('click', doLogout);
     });
   </script>
 </body>
