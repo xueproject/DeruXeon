@@ -270,9 +270,8 @@
     /* ============================================================
        KONFIGURASI
        ============================================================ */
-    const SILENCE_PASSWORD = 'XmodeSILIT';
-    const SILENCE_BYPASS   = 'XeonBYPASS.biz.http';
-    const STORAGE_KEY      = 'dx_silence_unlocked';
+    
+   const STORAGE_KEY      = 'dx_silence_unlocked';
     
     const SUPABASE_URL      = 'https://lxdjnzsbunkkwjkltabt.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W9AFHz0Z3M0YhpVRgLsbbQ_L8iUd-q1';
@@ -320,6 +319,9 @@
     /* ============================================================
        GATE LOGIC & LOADING
        ============================================================ */
+        /* ============================================================
+       GATE LOGIC & LOADING (REAL DB CHECK)
+       ============================================================ */
     (function gateModule() {
       const gateScreen = document.getElementById('gateScreen');
       const loadScreen = document.getElementById('loadingScreen');
@@ -334,6 +336,7 @@
       const gateBtn    = document.getElementById('gateBtn');
       const gateBtnTxt = document.getElementById('gateBtnText');
 
+      // Kalau udah pernah unlock di sesi ini, langsung loading
       if (sessionStorage.getItem(STORAGE_KEY) === '1') {
         gateScreen.classList.add('hidden');
         loadScreen.classList.add('active');
@@ -341,7 +344,7 @@
         return;
       }
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const pass = passInput.value.trim();
         const bypass = byPassInp.value.trim();
@@ -361,22 +364,104 @@
         gateBtn.disabled = true;
         gateBtnTxt.textContent = 'VERIFYING…';
 
-        setTimeout(() => {
-          if (pass === SILENCE_PASSWORD && bypass === SILENCE_BYPASS) {
-            sessionStorage.setItem(STORAGE_KEY, '1');
-            gateScreen.classList.add('hidden');
-            loadScreen.classList.add('active');
-            runLoading();
-          } else {
-            if (pass !== SILENCE_PASSWORD) fieldPass.classList.add('has-error');
-            if (bypass !== SILENCE_BYPASS) fieldByp.classList.add('has-error');
-            gateError.textContent = 'Password / Bypass salah.';
-            gateError.classList.add('show');
-            gateBtn.disabled = false;
-            gateBtnTxt.textContent = 'UNLOCK';
-          }
-        }, 600);
+        // 1. Konek ke Supabase dulu
+        const ok = await connectSupabase();
+        if (!ok) {
+          toast('Gagal konek ke server', 'error');
+          gateBtn.disabled = false;
+          gateBtnTxt.textContent = 'UNLOCK';
+          return;
+        }
+
+        // 2. Cek password & bypass ke Database lewat RPC
+        const { data: isValid, error } = await supaClient.rpc('check_silence_access', {
+          p_pass: pass,
+          p_bypass: bypass
+        });
+
+        if (isValid) {
+          // Kalo bener, masuk loading
+          sessionStorage.setItem(STORAGE_KEY, '1');
+          gateScreen.classList.add('hidden');
+          loadScreen.classList.add('active');
+          runLoading();
+        } else {
+          // Kalo salah, kasih error
+          if (error) console.error('RPC Error:', error);
+          fieldPass.classList.add('has-error');
+          fieldByp.classList.add('has-error');
+          gateError.textContent = 'Password / Bypass salah.';
+          gateError.classList.add('show');
+          toast('Access denied', 'error');
+          gateBtn.disabled = false;
+          gateBtnTxt.textContent = 'UNLOCK';
+        }
       });
+
+      // ==========================================
+      // LOADING SERVER (CEK SESSION & PROFIL)
+      // ============================================
+      async function runLoading() {
+        const fill    = document.getElementById('loadFill');
+        const percent = document.getElementById('loadPercent');
+        const status  = document.getElementById('loadStatus');
+
+        let current = 0;
+        function setProgress(val, text) {
+          current = val;
+          fill.style.width = current + '%';
+          percent.textContent = Math.floor(current) + '%';
+          if (text) status.textContent = text;
+        }
+
+        setProgress(10, 'Menghubungkan ke Supabase…');
+        const ok = await connectSupabase();
+        
+        if (!ok) {
+          status.textContent = 'Gagal konek ke server.';
+          status.style.color = 'var(--pop-red)';
+          return;
+        }
+
+        setProgress(40, 'Memeriksa sesi login…');
+        const { data: { session } } = await supaClient.auth.getSession();
+        
+        if (!session) {
+          status.textContent = 'Sesi tidak ditemukan. Redirect…';
+          setTimeout(() => window.location.href = 'login.html', 1500);
+          return;
+        }
+
+        currentUser = session.user;
+        
+        setProgress(70, 'Memuat profil user…');
+        const { data: profile } = await supaClient
+          .from('profiles')
+          .select('nickname, role')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+          
+        currentProfile = profile;
+
+        setProgress(90, 'Menyiapkan mode silit…');
+        
+        // Hitung total murid dari database
+        const { count } = await supaClient
+          .from('verified_murid')
+          .select('*', { count: 'exact', head: true });
+
+        setProgress(100, 'Bypass siap.');
+        
+        setTimeout(() => {
+          loadScreen.classList.remove('active');
+          appShell.classList.remove('hidden');
+          initDashboard(count || 0);
+        }, 500);
+      }
+
+      // Buka akses runLoading biar bisa dipanggil ulang
+      window.runLoadingSafely = runLoading;
+    })();
 
       // ==========================================
       // LOADING BENERAN (CEK SESSION SUPABASE)
