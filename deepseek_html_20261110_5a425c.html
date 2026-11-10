@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FFF8E7">
+  <title>DeruXeon</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       THEME ENGINE (Comic Paper)
+       ============================================================ */
+    :root {
+      --pop-yellow: #FFD93D;
+      --pop-pink:   #FF6B9D;
+      --pop-blue:   #4ECDC4;
+      --pop-red:    #FF5252;
+      --pop-purple: #A78BFA;
+      --space-xs: 0.5rem; --space-sm: 1rem; --space-md: 1.5rem; --space-lg: 2.5rem;
+      --font-display: 'Bangers', 'Impact', cursive;
+      --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+      --app-max-width: 430px; --app-pad: 1.25rem;
+    }
+
+    /* LIGHT THEME */
+    :root, [data-theme="light"], [data-theme="classic"] {
+      --ink: #1A1A1A; --paper: #FFF8E7; --paper-dark: #F5EBD0;
+      --color-text-muted: #5A5A5A;
+      --border-thick: 3px solid var(--ink);
+      --border-thicker: 4px solid var(--ink);
+      --shadow-comic: 5px 5px 0 var(--ink);
+      --shadow-comic-sm: 3px 3px 0 var(--ink);
+      --halftone: rgba(26,26,26,0.08);
+      --error: #D92D20; --success: #059669;
+    }
+
+    /* DARK THEME */
+    [data-theme="dark"] {
+      --ink: #F2EDE0; --paper: #15130F; --paper-dark: #221F18;
+      --color-text-muted: #A8A296;
+      --border-thick: 3px solid var(--ink);
+      --border-thicker: 4px solid var(--ink);
+      --shadow-comic: 5px 5px 0 rgba(242,237,224,0.9);
+      --shadow-comic-sm: 3px 3px 0 rgba(242,237,224,0.9);
+      --halftone: rgba(242,237,224,0.06);
+      --error: #FF8A80; --success: #6EE7B7;
+    }
+
+    /* ============================================================
+       BASE STYLES
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body); font-weight: 600; font-size: 16px; line-height: 1.6;
+      color: var(--ink); background-color: var(--paper);
+      background-image: radial-gradient(circle at 1px 1px, var(--halftone) 1px, transparent 0);
+      background-size: 12px 12px;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh; display: flex; justify-content: center;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    input { font-family: inherit; font-size: inherit; color: inherit; outline: none; }
+    a, button { cursor: pointer; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    .hidden { display: none !important; }
+
+    /* ============================================================
+       SCREEN MANAGER
+       ============================================================ */
+    .screen {
+      position: absolute; inset: 0;
+      width: 100%; max-width: var(--app-max-width); margin: 0 auto;
+      min-height: 100dvh; padding-inline: var(--app-pad); padding-block: var(--space-md);
+      display: flex; flex-direction: column;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: translateY(10px);
+      overflow-y: auto;
+    }
+    .screen.active {
+      opacity: 1; visibility: visible; transform: translateY(0);
+      position: relative;
+    }
+
+    /* ============================================================
+       THEME TOGGLE
+       ============================================================ */
+    .theme-toggle {
+      position: fixed; top: 14px; right: 14px; width: 44px; height: 44px;
+      border-radius: 12px; background: var(--pop-yellow); border: var(--border-thick);
+      box-shadow: var(--shadow-comic-sm); display: flex; align-items: center; justify-content: center;
+      z-index: 100; transition: transform 0.15s ease;
+    }
+    .theme-toggle:active { transform: scale(0.92); }
+    .theme-toggle svg { width: 22px; height: 22px; color: #1A1A1A; }
+
+    /* ============================================================
+       SCREEN 1: INITIALIZED
+       ============================================================ */
+    #screen-initialized {
+      align-items: center; justify-content: center; text-align: center; gap: var(--space-md);
+    }
+    .init-logo {
+      width: 110px; height: 110px; border-radius: 18px; background: var(--pop-yellow);
+      border: var(--border-thicker); box-shadow: var(--shadow-comic);
+      display: flex; align-items: center; justify-content: center;
+      transform: rotate(-3deg); position: relative; animation: wobble 2.6s ease-in-out infinite;
+    }
+    .init-logo::before {
+      content: ''; position: absolute; inset: -14px; background: var(--pop-pink);
+      border-radius: 18px; z-index: -1; transform: rotate(6deg); border: var(--border-thick);
+    }
+    .init-logo svg { width: 56px; height: 56px; color: #111; stroke-width: 2.2; }
+    @keyframes wobble { 0%, 100% { transform: rotate(-3deg) scale(1); } 50% { transform: rotate(-1deg) scale(1.04); } }
+
+    .init-title { font-size: 3rem; letter-spacing: 0.06em; text-shadow: 3px 3px 0 var(--pop-yellow); transform: rotate(-1deg); color: var(--ink); }
+    .init-sub {
+      display: inline-block; margin-top: 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em;
+      text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 5px 12px;
+      border-radius: 4px; transform: rotate(1.5deg);
+    }
+
+    .init-progress { width: 100%; max-width: 280px; margin-top: 20px; }
+    .progress-track { width: 100%; height: 26px; border-radius: 6px; background: var(--paper-dark); border: var(--border-thicker); box-shadow: var(--shadow-comic-sm); overflow: hidden; position: relative; }
+    .progress-fill { width: 0%; height: 100%; background: repeating-linear-gradient(-45deg, var(--pop-blue), var(--pop-blue) 8px, var(--pop-purple) 8px, var(--pop-purple) 16px); transition: width 0.25s ease; position: relative; }
+    .progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); animation: shimmer 1.2s linear infinite; }
+    @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 0.72rem; font-weight: 800; color: var(--ink); text-transform: uppercase; }
+    .percent-box { font-family: var(--font-display); font-size: 1.1rem; background: var(--pop-yellow); padding: 2px 10px; border: 2px solid var(--ink); border-radius: 4px; transform: rotate(-2deg); color: #111; }
+    .init-status { font-size: 0.7rem; font-weight: 700; color: var(--color-text-muted); min-height: 1rem; font-style: italic; }
+
+    /* ============================================================
+       SCREEN 2: LANDING / DAFTAR
+       ============================================================ */
+    .brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-sm); text-align: center; margin-top: 20px; margin-bottom: 20px; }
+    .brand-logo { width: 88px; height: 88px; border-radius: 16px; background: var(--pop-pink); border: var(--border-thicker); box-shadow: var(--shadow-comic); display: flex; align-items: center; justify-content: center; transform: rotate(-2deg); }
+    .brand-logo svg { width: 46px; height: 46px; color: #111; stroke-width: 2.2; }
+    .brand-title { font-size: 3.4rem; text-shadow: 3px 3px 0 var(--pop-yellow); transform: rotate(-1deg); color: var(--ink); }
+    .brand-tagline { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-text-muted); }
+
+    .btn-google { width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 18px; border-radius: 10px; background: var(--paper); border: var(--border-thick); box-shadow: var(--shadow-comic-sm); font-weight: 800; font-size: 0.9rem; color: var(--ink); transition: transform 0.12s ease; margin-bottom: 16px; }
+    .btn-google:active { transform: scale(0.96); }
+    .btn-google svg { width: 20px; height: 20px; }
+
+    .divider { display: flex; align-items: center; gap: var(--space-sm); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 16px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 2px; background: var(--ink); opacity: 0.2; }
+
+    .auth-form { display: flex; flex-direction: column; gap: 12px; }
+    .field label { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 6px; }
+    .field input { width: 100%; padding: 13px 14px; border-radius: 10px; border: var(--border-thick); background: var(--paper); color: var(--ink); font-size: 0.9rem; font-weight: 600; box-shadow: var(--shadow-comic-sm); transition: transform 0.12s ease, box-shadow 0.12s ease; }
+    .field input::placeholder { color: var(--color-text-muted); opacity: 0.6; }
+    .field input:focus { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--pop-blue); }
+    
+    .field.has-error input { border-color: var(--error); box-shadow: 3px 3px 0 var(--error); }
+    .field-error { display: none; font-size: 0.7rem; font-weight: 700; color: var(--error); margin-top: 5px; }
+    .field.has-error .field-error { display: block; }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--ink); }
+    .pw-toggle svg { width: 18px; height: 18px; }
+
+    .btn-submit { width: 100%; padding: 15px; border-radius: 10px; background: var(--pop-yellow); border: var(--border-thicker); box-shadow: var(--shadow-comic); font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.06em; color: #1A1A1A; margin-top: var(--space-xs); transition: transform 0.12s ease, box-shadow 0.12s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-submit:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--ink); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+    .spinner { width: 20px; height: 20px; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-note { text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--color-text-muted); margin-top: 16px; }
+    .auth-note a { font-weight: 800; color: var(--ink); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: var(--border-thick); box-shadow: var(--shadow-comic-sm); opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 300; max-width: calc(100% - 2rem); text-align: center; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--error); color: #fff; border-color: #fff; }
+    .toast.success { background: var(--success); color: #fff; border-color: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- THEME TOGGLE (Global) -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+    <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+
+  <!-- ============================================================
+       SCREEN 1: INITIALIZED
+       ============================================================ -->
+  <div class="screen active" id="screen-initialized">
+    <div class="init-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 4h5a8 8 0 0 1 0 16H7z"/><path d="M17.5 5.5l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/></svg>
+    </div>
+    <div>
+      <h1 class="init-title">Initialized</h1>
+      <p class="init-sub">DeruXeon Server</p>
+    </div>
+    <div class="init-progress">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-meta">
+        <span class="init-status" id="initStatus">Menyiapkan server…</span>
+        <span class="percent-box" id="progressPercent">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 2: LANDING / DAFTAR
+       ============================================================ -->
+  <div class="screen hidden" id="screen-landing">
+    
+    <div class="brand">
+      <div class="brand-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 4h5a8 8 0 0 1 0 16H7z"/><path d="M17.5 5.5l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z"/></svg>
+      </div>
+      <h1 class="brand-title">DeruXeon</h1>
+      <p class="brand-tagline">Community · Premium · Private</p>
+    </div>
+
+    <button type="button" class="btn-google" id="btnGoogle">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+      </svg>
+      Lanjutkan dengan Google
+    </button>
+
+    <div class="divider">atau daftar dengan email</div>
+
+    <form class="auth-form" id="authForm" novalidate>
+      <div class="field" id="field-email">
+        <label for="fEmail">Email</label>
+        <input id="fEmail" type="email" placeholder="kamu@email.com" required>
+        <span class="field-error" id="err-email"></span>
+      </div>
+      <div class="field" id="field-nick">
+        <label for="fNick">Nickname</label>
+        <input id="fNick" type="text" placeholder="Nama panggilan" required maxlength="24">
+        <span class="field-error" id="err-nick"></span>
+      </div>
+      <div class="field" id="field-wa">
+        <label for="fWa">No. WhatsApp Aktif</label>
+        <input id="fWa" type="tel" inputmode="numeric" placeholder="08xxxxxxxxxx" required>
+        <span class="field-error" id="err-wa"></span>
+      </div>
+      <div class="field" id="field-tg">
+        <label for="fTg">Telegram Link</label>
+        <input id="fTg" type="text" placeholder="t.me/namatelekamu" required>
+        <span class="field-error" id="err-tg"></span>
+      </div>
+      <div class="field" id="field-pass">
+        <label for="fPass">Password</label>
+        <div class="pw-wrap">
+          <input id="fPass" type="password" placeholder="••••••••" required minlength="6">
+          <button type="button" class="pw-toggle" id="pwToggle">
+            <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-6.5 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg>
+          </button>
+        </div>
+        <span class="field-error" id="err-pass"></span>
+      </div>
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span id="btnSubmitText">DAFTAR</span>
+      </button>
+    </form>
+
+    <p class="auth-note">
+      Sudah punya akun? <a href="login.html">Masuk di sini</a>
+    </p>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- SUPABASE SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+  <script>
+    const SUPABASE_URL      = 'https://lxdjnzsbunkkwjkltabt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_W9AFHz0Z3M0YhpVRgLsbbQ_L8iUd-q1';
+    let supaClient = null;
+
+    /* ============================================================
+       THEME TOGGLE
+       ============================================================ */
+    (function themeModule() {
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const sun = document.getElementById('iconSun');
+      const moon = document.getElementById('iconMoon');
+      const meta = document.querySelector('meta[name="theme-color"]');
+      const KEY = 'dx_theme';
+
+      function applyTheme(theme) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        sun.classList.toggle('hidden', isDark);
+        moon.classList.toggle('hidden', !isDark);
+        if (meta) meta.setAttribute('content', isDark ? '#15130F' : '#FFF8E7');
+      }
+      const saved = localStorage.getItem(KEY);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(KEY, next);
+      });
+    })();
+
+    /* ============================================================
+       TOAST
+       ============================================================ */
+    let toastTimer;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000);
+    }
+
+    /* ============================================================
+       INIT SUPABASE
+       ============================================================ */
+    async function initSupa() {
+      return new Promise(r => {
+        if (window.supabase) { supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); r(true); return; }
+        let t = 0;
+        const timer = setInterval(() => {
+          t++;
+          if (window.supabase) { clearInterval(timer); supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); r(true); }
+          if (t >= 80) { clearInterval(timer); r(false); }
+        }, 100);
+      });
+    }
+
+    /* ============================================================
+       SCREEN 1: LOADING & ROUTING LOGIC
+       ============================================================ */
+    (async function loadingScreen() {
+      const fill = document.getElementById('progressFill');
+      const percent = document.getElementById('progressPercent');
+      const status = document.getElementById('initStatus');
+      
+      const stages = [
+        { at: 20,  text: 'Menghubungkan ke server…' },
+        { at: 50,  text: 'Memuat modul inti…' },
+        { at: 80,  text: 'Memeriksa sesi login…' },
+        { at: 100, text: 'Server siap.' }
+      ];
+
+      let current = 0;
+      function tick() {
+        const step = 2 + Math.random() * 4;
+        current = Math.min(100, current + step);
+        fill.style.width = current + '%';
+        percent.textContent = Math.floor(current) + '%';
+
+        const st = stages.find(s => current <= s.at) || stages[stages.length - 1];
+        status.textContent = st.text;
+
+        if (current >= 100) {
+          setTimeout(checkAuth, 400);
+          return;
+        }
+        setTimeout(tick, 60 + Math.random() * 60);
+      }
+
+      // Mulai animasi
+      tick();
+    })();
+
+    async function checkAuth() {
+      const ok = await initSupa();
+      if (!ok) {
+        toast('Gagal konek server', 'error');
+        showLanding();
+        return;
+      }
+
+      // Cek Session
+      const { data: { session } } = await supaClient.auth.getSession();
+      if (session) {
+        // Kalau udah login, lempar ke dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        // Kalau belum, tampilkan landing page
+        showLanding();
+      }
+    }
+
+    function showLanding() {
+      document.getElementById('screen-initialized').classList.remove('active');
+      document.getElementById('screen-initialized').classList.add('hidden');
+      
+      const landing = document.getElementById('screen-landing');
+      landing.classList.remove('hidden');
+      // Delay dikit biar transisi CSS-nya jalan
+      setTimeout(() => landing.classList.add('active'), 50);
+    }
+
+    /* ============================================================
+       SCREEN 2: FORM VALIDATION & SIGNUP
+       ============================================================ */
+    const validators = {
+      email: v => { if (!v) return 'Email wajib diisi.'; if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Format email salah.'; return ''; },
+      nick:  v => { if (!v) return 'Nickname wajib diisi.'; if (v.length < 3) return 'Minimal 3 karakter.'; if (!/^[a-zA-Z0-9._-]+$/.test(v)) return 'Hanya huruf/angka/titik.'; return ''; },
+      wa:    v => { const d = v.replace(/\D/g,''); if (!v) return 'WA wajib diisi.'; if (!/^08\d{8,12}$/.test(d)) return 'Format WA salah (08xx).'; return ''; },
+      tg:    v => { if (!v) return 'Telegram wajib diisi.'; if (!v.match(/^(?:https?:\/\/)?(?:t\.me|telegram\.me)\/([a-zA-Z0-9_]{4,32})\/?$/) && !v.match(/^@([a-zA-Z0-9_]{4,32})$/) && !v.match(/^([a-zA-Z0-9_]{4,32})$/)) return 'Format t.me/username.'; return ''; },
+      pass:  v => { if (!v) return 'Password wajib diisi.'; if (v.length < 6) return 'Minimal 6 karakter.'; return ''; }
+    };
+
+    const fieldMap = {
+      email: { input: 'fEmail', field: 'field-email', err: 'err-email' },
+      nick:  { input: 'fNick',  field: 'field-nick',  err: 'err-nick'  },
+      wa:    { input: 'fWa',    field: 'field-wa',    err: 'err-wa'    },
+      tg:    { input: 'fTg',    field: 'field-tg',    err: 'err-tg'    },
+      pass:  { input: 'fPass',  field: 'field-pass',  err: 'err-pass'  }
+    };
+
+    function setError(key, msg) {
+      const m = fieldMap[key];
+      const f = document.getElementById(m.field);
+      const e = document.getElementById(m.err);
+      if (msg) { f.classList.add('has-error'); e.textContent = msg; e.style.display = 'block'; }
+      else { f.classList.remove('has-error'); e.textContent = ''; e.style.display = 'none'; }
+      return !msg;
+    }
+
+    Object.keys(fieldMap).forEach(k => {
+      const el = document.getElementById(fieldMap[k].input);
+      el.addEventListener('input', () => { if (el.closest('.field').classList.contains('has-error')) setError(k, validators[k](k==='pass'?el.value:el.value.trim())); });
+    });
+
+    // Password toggle
+    document.getElementById('pwToggle').addEventListener('click', () => {
+      const i = document.getElementById('fPass');
+      const o = document.getElementById('eyeOpen');
+      const c = document.getElementById('eyeClosed');
+      const show = i.type === 'password';
+      i.type = show ? 'text' : 'password';
+      o.classList.toggle('hidden', show);
+      c.classList.toggle('hidden', !show);
+    });
+
+    // Submit Form
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      const btnTxt = document.getElementById('btnSubmitText');
+      if (btn.disabled) return;
+
+      const data = {
+        email: document.getElementById('fEmail').value.trim(),
+        nick: document.getElementById('fNick').value.trim(),
+        wa: document.getElementById('fWa').value.trim(),
+        tg: document.getElementById('fTg').value.trim(),
+        pass: document.getElementById('fPass').value
+      };
+
+      let ok = true;
+      ['email','nick','wa','tg','pass'].forEach(k => { if (!setError(k, validators[k](data[k]))) ok = false; });
+      if (!ok) return toast('Periksa kembali form.', 'error');
+      if (!supaClient) return toast('Koneksi server gagal.', 'error');
+
+      btn.disabled = true;
+      btnTxt.textContent = 'MEMPROSES…';
+      const spinner = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      spinner.setAttribute('class','spinner'); spinner.setAttribute('viewBox','0 0 24 24');
+      spinner.innerHTML = '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>';
+      btn.prepend(spinner);
+
+      try {
+        const { data: authData, error } = await supaClient.auth.signUp({
+          email: data.email,
+          password: data.pass,
+          options: { data: { nickname: data.nick, wa: data.wa, telegram: data.tg } }
+        });
+
+        if (error) {
+          if (error.message.includes('already registered')) { setError('email', 'Email sudah terdaftar.'); toast('Email sudah dipakai.', 'error'); }
+          else toast('Gagal daftar: ' + error.message, 'error');
+          return;
+        }
+
+        if (authData.session) {
+          toast('Berhasil daftar!', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 800);
+        } else {
+          toast('Cek email lo untuk verifikasi, lalu login.', 'success');
+          document.getElementById('authForm').reset();
+        }
+      } catch (err) {
+        toast('Error sistem.', 'error');
+      } finally {
+        spinner.remove(); btn.disabled = false; btnTxt.textContent = 'DAFTAR';
+      }
+    });
+
+    // Google Login
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
+      if (!supaClient) return toast('Koneksi server gagal.', 'error');
+      const { error } = await supaClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/dashboard.html' }
+      });
+      if (error) toast('Google OAuth gagal.', 'error');
+    });
+
+  </script>
+</body>
+</html>
