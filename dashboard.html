@@ -800,6 +800,11 @@ document.getElementById('greetTitle').innerHTML = `Halo, ${nameHtml}!`;
           document.getElementById('userName').textContent = newNick;
           document.getElementById('greetTitle').textContent = `Halo, ${newNick}!`;
           document.getElementById('setNicknameDisplay').textContent = newNick;
+          document.getElementById('composerAvatar').textContent = nickname.charAt(0).toUpperCase();
+
+// Panggil data feed & chat pas aplikasi dibuka
+loadFeed();
+loadChatList();
           document.getElementById('ppAvatar').textContent = newNick.charAt(0).toUpperCase();
           document.getElementById('userAvatar').textContent = newNick.charAt(0).toUpperCase();
         }
