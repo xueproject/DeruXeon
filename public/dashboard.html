@@ -811,58 +811,81 @@
     /* ============================================================
        PROFILE, FOLLOW, CHAT CONTEXT MENU
        ============================================================ */
-    window.openProfile = async (userId) => {
+        window.openProfile = async (userId) => {
       const modal = document.getElementById('profileModal');
       const pName = document.getElementById('pmName'), pRole = document.getElementById('pmRole'), pAvatar = document.getElementById('pmAvatar'), pPosts = document.getElementById('pmPosts');
       const btnFollow = document.getElementById('btnFollow'), pmFollowers = document.getElementById('pmFollowers'), pmFollowing = document.getElementById('pmFollowing');
 
       activeProfileId = userId;
       modal.classList.add('show');
-      pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem;">Memuat profil...</div>';
+      pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--color-text-muted);">Memuat profil...</div>';
       btnFollow.classList.add('hidden');
+      pmFollowers.textContent = '...';
+      pmFollowing.textContent = '...';
 
       try {
-        const { data: profile } = await supaClient.from('profiles').select('nickname, role, avatar_url').eq('id', userId).single();
-        if (!profile) throw new Error("Profil kosong");
+        // 1. Ambil Data Profil (Wajib Berhasil)
+        const { data: profile, error: errProfile } = await supaClient.from('profiles').select('nickname, role, avatar_url').eq('id', userId).single();
+        
+        if (errProfile || !profile) {
+          console.error("Profil Error:", errProfile);
+          pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--pop-red);">Gagal memuat profil. (Cek RLS Supabase)</div>';
+          return;
+        }
         
         pName.textContent = profile.nickname;
         pRole.textContent = sanitizeRole(profile.role);
         if (profile.avatar_url) pAvatar.innerHTML = `<img src="${profile.avatar_url}">`;
         else pAvatar.textContent = profile.nickname.charAt(0).toUpperCase();
 
-        const [followersRes, followingRes] = await Promise.all([
-          supaClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
-          supaClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId)
-        ]);
-        pmFollowers.textContent = followersRes.count || 0;
-        pmFollowing.textContent = followingRes.count || 0;
-
-        if (userId !== currentUser.id) {
-          btnFollow.classList.remove('hidden');
-          const { data: isFollowing } = await supaClient.from('follows').select('id').match({ follower_id: currentUser.id, following_id: userId }).maybeSingle();
-          
-          if (isFollowing) {
-            btnFollow.textContent = 'Unfollow';
-            btnFollow.classList.add('followed');
-          } else {
-            btnFollow.textContent = 'Follow';
-            btnFollow.classList.remove('followed');
-          }
-          
-          btnFollow.onclick = async () => {
-            if (isFollowing) {
-              await supaClient.from('follows').delete().match({ follower_id: currentUser.id, following_id: userId });
-              toast('Unfollowed', 'success');
-            } else {
-              await supaClient.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
-              toast('Followed!', 'success');
-            }
-            openProfile(userId); loadStats();
-          };
+        // 2. Ambil Data Followers/Following (Kalau Error, tetep lanjut)
+        try {
+          const [followersRes, followingRes] = await Promise.all([
+            supaClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
+            supaClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId)
+          ]);
+          pmFollowers.textContent = followersRes.count || 0;
+          pmFollowing.textContent = followingRes.count || 0;
+        } catch(e) { 
+          console.warn("Tabel follows error", e);
+          pmFollowers.textContent = '-';
+          pmFollowing.textContent = '-';
         }
 
+        // 3. Cek Status Follow & Tombol Follow
+        if (userId !== currentUser.id) {
+          btnFollow.classList.remove('hidden');
+          try {
+            const { data: isFollowing } = await supaClient.from('follows').select('id').match({ follower_id: currentUser.id, following_id: userId }).maybeSingle();
+            
+            if (isFollowing) {
+              btnFollow.textContent = 'Unfollow';
+              btnFollow.classList.add('followed');
+            } else {
+              btnFollow.textContent = 'Follow';
+              btnFollow.classList.remove('followed');
+            }
+            
+            btnFollow.onclick = async () => {
+              if (isFollowing) {
+                await supaClient.from('follows').delete().match({ follower_id: currentUser.id, following_id: userId });
+                toast('Unfollowed', 'success');
+              } else {
+                await supaClient.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
+                toast('Followed!', 'success');
+              }
+              openProfile(userId); 
+              loadStats().catch(console.error); // Update stat di home
+            };
+          } catch(e) { btnFollow.classList.add('hidden'); }
+        }
+
+        // 4. Ambil Postingan User
         const { data: posts } = await supaClient.from('posts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5);
-        if (!posts || posts.length === 0) { pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--color-text-muted);">Belum ada postingan.</div>'; return; }
+        if (!posts || posts.length === 0) { 
+          pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--color-text-muted);">Belum ada postingan.</div>'; 
+          return; 
+        }
         
         pPosts.innerHTML = posts.map(p => `
           <div style="background:var(--paper-dark); border:2px solid var(--ink); border-radius:10px; padding:10px;">
@@ -871,7 +894,11 @@
             <div style="font-size:0.6rem; color:var(--color-text-muted); margin-top:5px;">${timeAgo(p.created_at)}</div>
           </div>
         `).join('');
-      } catch(e) { console.error(e); pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--pop-red);">Gagal memuat profil.</div>'; }
+
+      } catch(e) { 
+        console.error("Fatal Profile Error:", e); 
+        pPosts.innerHTML = '<div style="text-align:center; font-size:0.8rem; color:var(--pop-red);">Sistem Error.</div>'; 
+      }
     };
     window.closeProfile = () => document.getElementById('profileModal').classList.remove('show');
 
