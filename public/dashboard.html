@@ -45,13 +45,21 @@
     input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; outline: none; }
     .hidden { display: none !important; }
 
-    /* BADGES */
+    /* BADGES & NOTIF */
     .badge-icon { display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; vertical-align: middle; }
     .badge-icon svg { width: 14px; height: 14px; }
     .badge-verified { color: var(--pop-blue); }
     .badge-crown { color: var(--pop-yellow); }
     .badge-blackhole { font-size: 14px; }
     .badge-custom { font-size: 0.55rem; font-weight: 800; background: var(--pop-pink); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; border: 1px solid var(--ink); }
+
+    .notif-badge {
+      position: absolute; top: -2px; right: 15%;
+      background: var(--pop-red); color: #fff;
+      font-size: 10px; font-weight: 800; padding: 2px 6px;
+      border-radius: 10px; border: 2px solid var(--paper);
+      display: none; z-index: 10;
+    }
 
     /* LAYOUT */
     .app-shell { width: 100%; max-width: var(--app-max-width); min-height: 100dvh; padding-bottom: calc(var(--nav-height) + var(--space-md)); display: flex; flex-direction: column; gap: var(--space-md); }
@@ -532,7 +540,11 @@
   <nav class="bubble-nav" id="bubbleNav">
     <div class="bubble-indicator" id="bubbleIndicator"></div>
     <button class="nav-item active" data-target="home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
-    <button class="nav-item" data-target="social"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>Social</span></button>
+    <button class="nav-item" data-target="social">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Social</span>
+      <span class="notif-badge" id="navNotif">0</span>
+    </button>
     <button class="nav-item" data-target="premium"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span>Premium</span></button>
     <button class="nav-item" data-target="settings"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Setting</span></button>
   </nav>
@@ -553,6 +565,7 @@
     let selectedMedia = null;
     let activeStoryId = null;
     let activeProfileId = null;
+    let unreadCount = 0;
     
     let contextTargetMsgId = null;
     let contextTargetType = null; 
@@ -561,7 +574,18 @@
     let toastTimer;
     function toast(msg, type = '') { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show ' + type; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast ' + type, 2500); }
     function hideLoading() { const o = document.getElementById('loadingOverlay'); if (o) { o.classList.add('fade-out'); setTimeout(() => o.remove(), 400); } }
-    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    
+    // SECURITY: Sanitasi Input (Anti XSS / Scrapper)
+    function escapeHtml(s) { 
+      return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); 
+    }
+    function sanitizeUrl(url) {
+      if (!url) return '';
+      // Hanya izinkan URL http, https, dan data:image
+      if (/^(https?:\/\/|data:image\/)/i.test(url)) return url;
+      return ''; // Tolak URL berbahaya (javascript:, vbscript:, dll)
+    }
+    
     function timeAgo(ts) { const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000); if (diff < 60) return 'baru saja'; if (diff < 3600) return Math.floor(diff/60) + 'm'; if (diff < 86400) return Math.floor(diff/3600) + 'j'; return Math.floor(diff/86400) + 'h'; }
     function getTimeNow(ts) { return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); }
     function sanitizeRole(role) { if (!role) return 'USER'; return role.replace(/'/g, '').replace(/::text/gi, '').trim().toUpperCase(); }
@@ -591,6 +615,17 @@
     function initTheme() { const saved = localStorage.getItem('dx_theme') || 'light'; applyTheme(saved); }
     document.querySelectorAll('.theme-btn').forEach(btn => { btn.addEventListener('click', () => { applyTheme(btn.dataset.setTheme); toast(`Tema: ${btn.dataset.setTheme.toUpperCase()}`, 'success'); }); });
 
+    // Notif Badge handler
+    function updateNotifBadge() {
+      const badge = document.getElementById('navNotif');
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
     document.querySelectorAll('#socialSubtabs .subtab').forEach(t => {
       t.addEventListener('click', () => {
         document.querySelectorAll('#socialSubtabs .subtab').forEach(x => x.classList.remove('active'));
@@ -602,6 +637,12 @@
         
         if(target === 'global') { const gm = document.getElementById('globalMessages'); gm.scrollTop = gm.scrollHeight; }
         if(target === 'discovery') { loadDiscoveryUsers(); }
+        
+        // Mark as read jika buka chat
+        if(target === 'chat') {
+          unreadCount = 0;
+          updateNotifBadge();
+        }
       });
     });
 
@@ -684,15 +725,16 @@
 
         if (newsRes.data && newsRes.data.length > 0) {
           nc.innerHTML = newsRes.data.map(n => {
-            const img = n.image_url ? `<img src="${n.image_url}" class="news-img">` : `<div style="height:100px; background:var(--paper-dark); border-bottom:2px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:var(--color-text-muted);">No Image</div>`;
-            const linkBtn = n.link_url ? `<a href="${n.link_url}" target="_blank" class="news-link">Baca</a>` : '';
+            const imgUrl = sanitizeUrl(n.image_url);
+            const img = imgUrl ? `<img src="${imgUrl}" class="news-img">` : `<div style="height:100px; background:var(--paper-dark); border-bottom:2px solid var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:var(--color-text-muted);">No Image</div>`;
+            const linkBtn = n.link_url ? `<a href="${sanitizeUrl(n.link_url)}" target="_blank" class="news-link">Baca</a>` : '';
             return `<div class="news-card">${img}<div class="news-content"><div class="news-title">${escapeHtml(n.title)}</div><div class="news-desc">${escapeHtml(n.content)}</div>${linkBtn}</div></div>`;
           }).join('');
         } else { nc.innerHTML = '<div class="info-item" style="padding:10px; font-size:0.75rem;">Belum ada berita.</div>'; }
 
         if (evRes.data && evRes.data.length > 0) {
           ec.innerHTML = evRes.data.map(e => {
-            const linkBtn = e.link_url ? `<a href="${e.link_url}" target="_blank" class="news-link" style="background:var(--pop-yellow);">Detail</a>` : '';
+            const linkBtn = e.link_url ? `<a href="${sanitizeUrl(e.link_url)}" target="_blank" class="news-link" style="background:var(--pop-yellow);">Detail</a>` : '';
             return `<div class="event-card"><div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-date">📅 ${new Date(e.event_date).toLocaleDateString('id-ID')}</div><div class="event-desc">${escapeHtml(e.description)}</div></div>${linkBtn}</div>`;
           }).join('');
         } else { ec.innerHTML = '<div class="info-item" style="padding:10px; font-size:0.75rem;">Belum ada event.</div>'; }
@@ -705,7 +747,7 @@
       const { data: users } = await supaClient.from('profiles').select('*').neq('id', currentUser.id).limit(50);
       if (!users || users.length === 0) { c.innerHTML = `<div class="empty-state">Belum ada user lain.</div>`; return; }
       c.innerHTML = users.map(u => {
-        const imgHtml = u.avatar_url ? `<img src="${u.avatar_url}">` : u.nickname.charAt(0).toUpperCase();
+        const imgHtml = u.avatar_url ? `<img src="${sanitizeUrl(u.avatar_url)}">` : escapeHtml(u.nickname.charAt(0).toUpperCase());
         return `<div class="user-row" onclick="openProfile('${u.id}')"><div class="user-avatar-sm">${imgHtml}</div><div class="user-info-sm" style="flex:1;"><div class="user-name-sm">${escapeHtml(u.nickname)} ${getBadgeHtml(u)}</div><div class="user-sub-sm">${sanitizeRole(u.role)}</div></div><button style="padding:4px 8px; background:var(--pop-blue); border:2px solid var(--ink); border-radius:6px; font-size:0.65rem; font-weight:800;">Lihat</button></div>`;
       }).join('');
     }
@@ -715,26 +757,26 @@
       let html = `<div class="story-item" onclick="document.getElementById('storyUpload').click()"><div class="story-circle add-new">+</div><div class="story-name">Buat</div></div>`;
       try {
         const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        // TANPA JOIN
         const { data: stories, error } = await supaClient.from('stories').select('*').gte('created_at', yesterday).order('created_at', { ascending: false });
         if (error) throw error;
 
         if (stories && stories.length > 0) {
-          // Tarik data user secara terpisah
           const userIds = [...new Set(stories.map(s => s.user_id))];
           const { data: profiles } = await supaClient.from('profiles').select('id, nickname').in('id', userIds);
           const pMap = {}; (profiles || []).forEach(p => pMap[p.id] = p.nickname);
 
           html += stories.map(s => {
             const author = pMap[s.user_id] || 'User';
-            return `<div class="story-item" onclick="viewStory('${s.id}', '${s.media_url}', '${escapeHtml(s.caption||'')}', '${s.user_id}')"><div class="story-circle"><img src="${s.media_url}" alt="Story"></div><div class="story-name">${escapeHtml(author)}</div></div>`;
+            const mediaUrl = sanitizeUrl(s.media_url);
+            if(!mediaUrl) return ''; // Skip if URL malicious
+            
+            return `<div class="story-item" onclick="viewStory('${s.id}', '${mediaUrl}', '${escapeHtml(s.caption||'')}', '${s.user_id}')"><div class="story-circle"><img src="${mediaUrl}" alt="Story"></div><div class="story-name">${escapeHtml(author)}</div></div>`;
           }).join('');
         }
       } catch(e) { console.error("Gagal load story", e); }
       container.innerHTML = html;
     }
 
-    // STORY UPLOAD TANPA BATAS
     document.getElementById('storyUpload').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       const caption = prompt("Masukkan caption story (opsional):");
@@ -773,7 +815,6 @@
     document.getElementById('btnAddPhoto').addEventListener('click', () => document.getElementById('postPhoto').click());
     document.getElementById('btnAddVideo').addEventListener('click', () => document.getElementById('postVideo').click());
 
-    // UPLOAD POSTINGAN TANPA BATAS
     document.getElementById('postPhoto').addEventListener('change', (e) => {
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader(); r.onload = () => { selectedMedia = { type: 'image', url: r.result }; renderPreview(); updatePostBtn(); }; r.readAsDataURL(f);
@@ -824,8 +865,8 @@
 
         c.innerHTML = posts.map(post => {
           const author = pMap[post.user_id] || { nickname: 'User', role: 'user', avatar_url: null, badge_type: 'none' };
-          const initial = author.nickname.charAt(0).toUpperCase();
-          const avatarHtml = author.avatar_url ? `<img src="${author.avatar_url}">` : initial;
+          const initial = escapeHtml(author.nickname.charAt(0).toUpperCase());
+          const avatarHtml = author.avatar_url ? `<img src="${sanitizeUrl(author.avatar_url)}">` : initial;
           const badgeHtml = getBadgeHtml(author);
           
           const postLikes = likes ? likes.filter(l => l.post_id === post.id) : [];
@@ -834,9 +875,10 @@
           const likeCount = postLikes.length;
           
           let media = '';
-          if (post.media_url) {
-            if (post.media_type === 'video') media = `<div class="post-media"><video src="${post.media_url}" controls></video></div>`;
-            else media = `<div class="post-media"><img src="${post.media_url}"></div>`;
+          const mediaUrl = sanitizeUrl(post.media_url);
+          if (mediaUrl) {
+            if (post.media_type === 'video') media = `<div class="post-media"><video src="${mediaUrl}" controls></video></div>`;
+            else media = `<div class="post-media"><img src="${mediaUrl}"></div>`;
           }
           
           return `
@@ -897,7 +939,6 @@
       if (el.classList.contains('show')) {
         const list = document.getElementById(`comment-list-${postId}`);
         list.innerHTML = '<div style="text-align:center; font-size:0.6rem; color:var(--color-text-muted);">Memuat...</div>';
-        // TANPA JOIN
         const { data: comments } = await supaClient.from('comments').select('*').eq('post_id', postId).order('created_at', { ascending: true });
         if (!comments || comments.length === 0) { list.innerHTML = '<div style="text-align:center; font-size:0.6rem; color:var(--color-text-muted);">Belum ada komen.</div>'; return; }
         
@@ -938,8 +979,8 @@
         
         pName.innerHTML = `${escapeHtml(profile.nickname)} ${getBadgeHtml(profile)}`;
         pRole.textContent = sanitizeRole(profile.role);
-        if (profile.avatar_url) pAvatar.innerHTML = `<img src="${profile.avatar_url}">`;
-        else pAvatar.textContent = profile.nickname.charAt(0).toUpperCase();
+        if (profile.avatar_url) pAvatar.innerHTML = `<img src="${sanitizeUrl(profile.avatar_url)}">`;
+        else pAvatar.textContent = escapeHtml(profile.nickname.charAt(0).toUpperCase());
 
         const [followersRes, followingRes] = await Promise.all([
           supaClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
@@ -970,7 +1011,10 @@
 
         const { data: posts } = await supaClient.from('posts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(5);
         if (!posts || posts.length === 0) { pPosts.innerHTML = '<div style="text-align:center; font-size:0.7rem; color:var(--color-text-muted);">Belum ada postingan.</div>'; return; }
-        pPosts.innerHTML = posts.map(p => `<div style="background:var(--paper-dark); border:2px solid var(--ink); border-radius:8px; padding:8px;"><div style="font-size:0.75rem;">${escapeHtml(p.text||'')}</div>${p.media_url ? (p.media_type === 'video' ? `<video src="${p.media_url}" controls style="width:100%; border-radius:4px; margin-top:4px;"></video>` : `<img src="${p.media_url}" style="width:100%; border-radius:4px; margin-top:4px;">`) : ''}<div style="font-size:0.55rem; color:var(--color-text-muted); margin-top:4px;">${timeAgo(p.created_at)}</div></div>`).join('');
+        pPosts.innerHTML = posts.map(p => {
+          const mUrl = sanitizeUrl(p.media_url);
+          return `<div style="background:var(--paper-dark); border:2px solid var(--ink); border-radius:8px; padding:8px;"><div style="font-size:0.75rem;">${escapeHtml(p.text||'')}</div>${mUrl ? (p.media_type === 'video' ? `<video src="${mUrl}" controls style="width:100%; border-radius:4px; margin-top:4px;"></video>` : `<img src="${mUrl}" style="width:100%; border-radius:4px; margin-top:4px;">`) : ''}<div style="font-size:0.55rem; color:var(--color-text-muted); margin-top:4px;">${timeAgo(p.created_at)}</div></div>`;
+        }).join('');
       } catch(e) { console.error(e); pPosts.innerHTML = '<div style="text-align:center; font-size:0.7rem; color:var(--pop-red);">Sistem Error.</div>'; }
     };
     window.closeProfile = () => document.getElementById('profileModal').classList.remove('show');
@@ -1004,7 +1048,7 @@
       if (data.length === 0) { listDiv.innerHTML = `<div style="text-align:center; font-size:0.7rem; color:var(--color-text-muted);">Belum ada.</div>`; return; }
       
       listDiv.innerHTML = data.map(u => {
-        const imgHtml = u.avatar_url ? `<img src="${u.avatar_url}">` : u.nickname.charAt(0).toUpperCase();
+        const imgHtml = u.avatar_url ? `<img src="${sanitizeUrl(u.avatar_url)}">` : escapeHtml(u.nickname.charAt(0).toUpperCase());
         return `<div class="user-row" onclick="closeListAndOpenProfile('${u.id}')"><div class="user-avatar-sm">${imgHtml}</div><div class="user-info-sm" style="flex:1;"><div class="user-name-sm">${escapeHtml(u.nickname)} ${getBadgeHtml(u)}</div><div class="user-sub-sm">${sanitizeRole(u.role)}</div></div></div>`;
       }).join('');
     };
@@ -1020,7 +1064,7 @@
       const { data: profiles } = await supaClient.from('profiles').select('*').neq('id', currentUser.id).limit(50);
       if (!profiles || profiles.length === 0) { c.innerHTML = `<div class="empty-state">Belum ada user lain.</div>`; return; }
       c.innerHTML = profiles.map(p => {
-        const imgHtml = p.avatar_url ? `<img src="${p.avatar_url}">` : p.nickname.charAt(0).toUpperCase();
+        const imgHtml = p.avatar_url ? `<img src="${sanitizeUrl(p.avatar_url)}">` : escapeHtml(p.nickname.charAt(0).toUpperCase());
         return `<div class="user-row" onclick="openChat('${p.id}', '${escapeHtml(p.nickname)}')"><div class="user-avatar-sm">${imgHtml}</div><div class="user-info-sm" style="flex:1;"><div class="user-name-sm">${escapeHtml(p.nickname)} ${getBadgeHtml(p)}</div><div class="user-sub-sm">${sanitizeRole(p.role)}</div></div><button style="padding:4px 8px; background:var(--pop-blue); border:2px solid var(--ink); border-radius:6px; font-size:0.65rem; font-weight:800;">Chat</button></div>`;
       }).join('');
     }
@@ -1030,6 +1074,12 @@
       document.getElementById('chatListView').classList.add('hidden');
       document.getElementById('chatView').classList.remove('hidden');
       document.getElementById('chatName').textContent = nick;
+      
+      // Mark as read kalo lagi buka chat ini
+      unreadCount = 0;
+      updateNotifBadge();
+      supaClient.from('messages').update({ is_read: true }).eq('receiver_id', currentUser.id).eq('sender_id', id).then();
+      
       loadMessages();
     };
 
@@ -1137,7 +1187,6 @@
     async function loadGlobalChat() {
       const c = document.getElementById('globalMessages');
       try {
-        // TANPA JOIN
         const { data: msgs, error } = await supaClient.from('global_messages').select('*').order('created_at', { ascending: true }).limit(50);
         if (error) throw error;
         
@@ -1218,7 +1267,7 @@
       if (error) return toast('Gagal update: ' + error.message, 'error');
       toast('Nickname diubah!', 'success');
       currentUserProfile.nickname = newNick;
-      document.getElementById('setNickDisplay').textContent = newNick; document.getElementById('userName').innerHTML = newNick + getBadgeHtml(currentUserProfile); document.getElementById('greetTitle').innerHTML = `Halo, ${newNick}!`;
+      document.getElementById('setNickDisplay').textContent = newNick; document.getElementById('userName').innerHTML = escapeHtml(newNick) + getBadgeHtml(currentUserProfile); document.getElementById('greetTitle').innerHTML = `Halo, ${escapeHtml(newNick)}!`;
     });
 
     document.getElementById('selectBadge').addEventListener('change', (e) => {
@@ -1239,7 +1288,7 @@
       toast('Badge berhasil diperbarui!', 'success');
       currentUserProfile.badge_type = type;
       currentUserProfile.custom_title = customTxt;
-      document.getElementById('userName').innerHTML = currentUserProfile.nickname + getBadgeHtml(currentUserProfile);
+      document.getElementById('userName').innerHTML = escapeHtml(currentUserProfile.nickname) + getBadgeHtml(currentUserProfile);
     });
 
     /* BOOT */
@@ -1258,9 +1307,9 @@
         const safeSetHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
         safeSetText('userAvatar', currentUserProfile.nickname.charAt(0).toUpperCase());
-        safeSetHTML('userName', currentUserProfile.nickname + getBadgeHtml(currentUserProfile));
+        safeSetHTML('userName', escapeHtml(currentUserProfile.nickname) + getBadgeHtml(currentUserProfile));
         safeSetText('userRole', sanitizeRole(currentUserProfile.role));
-        safeSetHTML('greetTitle', `Halo, ${currentUserProfile.nickname}!`);
+        safeSetHTML('greetTitle', `Halo, ${escapeHtml(currentUserProfile.nickname)}!`);
         safeSetText('composerAvatar', currentUserProfile.nickname.charAt(0).toUpperCase());
         safeSetText('setNickDisplay', currentUserProfile.nickname);
         safeSetText('inputNickname', currentUserProfile.nickname);
@@ -1269,8 +1318,8 @@
         safeSetText('setRole', sanitizeRole(currentUserProfile.role));
 
         if (currentUserProfile.avatar_url) {
-          safeSetHTML('userAvatar', `<img src="${currentUserProfile.avatar_url}">`);
-          safeSetHTML('composerAvatar', `<img src="${currentUserProfile.avatar_url}">`);
+          safeSetHTML('userAvatar', `<img src="${sanitizeUrl(currentUserProfile.avatar_url)}">`);
+          safeSetHTML('composerAvatar', `<img src="${sanitizeUrl(currentUserProfile.avatar_url)}">`);
           document.getElementById('ppText').classList.add('hidden'); document.getElementById('ppImage').src = currentUserProfile.avatar_url; document.getElementById('ppImage').classList.remove('hidden');
         } else { safeSetText('ppText', currentUserProfile.nickname.charAt(0).toUpperCase()); }
 
@@ -1288,6 +1337,11 @@
         safeSetText('apiKeyText', storedApi);
         safeSetText('apiIpText', `103.152.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
 
+        // Fetch Unread Chat untuk pertama kali
+        const { count } = await supaClient.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', currentUser.id).eq('is_read', false);
+        unreadCount = count || 0;
+        updateNotifBadge();
+
         initTheme(); startClock();
         
         loadStats().catch(console.error);
@@ -1297,14 +1351,25 @@
         loadStories().catch(console.error);
         loadChatList().catch(console.error);
 
-        // REALTIME UNTUK CHAT PRIBADI
-        privateChannel = supaClient.channel('public:messages')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) => {
-            if (!activeChatUser) return;
+        // REALTIME UNTUK CHAT PRIBADI & NOTIFIKASI
+        privateChannel = supaClient.channel('private_messages_realtime')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
             const newMsg = payload.new;
-            // Cek apakah pesan ini relevan sama chat yang lagi dibuka
-            if ((newMsg.sender_id === currentUser.id && newMsg.receiver_id === activeChatUser.id) || 
-                (newMsg.sender_id === activeChatUser.id && newMsg.receiver_id === currentUser.id)) {
+            
+            // Cek apakah pesan ini buat user yang lagi login
+            if (newMsg.receiver_id === currentUser.id) {
+              // Kalau lagi buka chat sama dia, langsung mark read & load
+              if (activeChatUser && activeChatUser.id === newMsg.sender_id && !document.getElementById('chatView').classList.contains('hidden')) {
+                loadMessages();
+                supaClient.from('messages').update({ is_read: true }).eq('id', newMsg.id).then();
+              } else {
+                // Kalau lagi gak buka chat, tambah notif
+                unreadCount++;
+                updateNotifBadge();
+              }
+            } 
+            // Kalau kita yang ngirim, update chat layar
+            else if (newMsg.sender_id === currentUser.id && activeChatUser && activeChatUser.id === newMsg.receiver_id) {
               loadMessages();
             }
           }).subscribe();
