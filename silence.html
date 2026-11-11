@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Library QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <style>
     :root {
@@ -22,7 +24,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-body); font-weight: 600; font-size: 16px; line-height: 1.6; color: var(--silence-text); background-color: var(--silence-bg); background-image: radial-gradient(circle at 20% 10%, rgba(124,58,237,0.15), transparent 40%), radial-gradient(circle at 80% 90%, rgba(167,139,250,0.12), transparent 40%), radial-gradient(circle at 1px 1px, rgba(167,139,250,0.06) 1px, transparent 0); background-size: auto, auto, 12px 12px; -webkit-font-smoothing: antialiased; min-height: 100dvh; display: flex; justify-content: center; }
     h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1; color: #F2EDE0; }
-    a { color: inherit; text-decoration: none; } button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; cursor: pointer; } input, select { font-family: inherit; font-size: inherit; color: inherit; outline: none; }
+    a { color: inherit; text-decoration: none; } button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; cursor: pointer; } input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; outline: none; }
     .hidden { display: none !important; }
 
     /* SCREEN MANAGER */
@@ -86,31 +88,42 @@
     .s-section-head h2 { font-size: 1.05rem; }
     .s-section-head svg { width: 18px; height: 18px; color: var(--silence-glow); }
     .s-section-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-    .blocked { color: var(--pop-red) !important; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 20px 0; }
     
     .s-field label { display: block; font-size: 0.62rem; font-weight: 800; color: var(--silence-muted); margin-bottom: 5px; text-transform: uppercase; }
-    .s-field input, .s-field select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(167,139,250,0.25); background: var(--silence-card2); color: var(--silence-text); font-weight: 600; }
-    .s-field input:focus, .s-field select:focus { border-color: var(--silence-glow); }
+    .s-field input, .s-field select, .s-field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(167,139,250,0.25); background: var(--silence-card2); color: var(--silence-text); font-weight: 600; }
+    .s-field input:focus, .s-field select:focus, .s-field textarea:focus { border-color: var(--silence-glow); }
     .s-btn { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--silence-accent), #4C1D95); border: 1px solid var(--silence-glow); color: #F2EDE0; font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.06em; box-shadow: 0 3px 0 rgba(76,29,149,0.6); transition: 0.1s; }
     .s-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(76,29,149,0.6); }
     .s-btn:disabled { opacity: 0.6; transform: none; }
     .s-btn.small { font-size: 0.85rem; padding: 9px; }
-    .game-log { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; margin-top: 10px; }
-    .log-item { padding: 8px 12px; background: var(--silence-card2); border-left: 3px solid var(--silence-glow); border-radius: 4px; font-size: 0.75rem; }
-    .log-item .log-time { font-size: 0.6rem; color: var(--silence-muted); margin-top: 2px; }
-    .log-empty { text-align: center; font-size: 0.7rem; color: var(--silence-muted); padding: 10px; }
+
+    /* TOOLS GRID */
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tool-card { padding: 15px; background: var(--silence-card2); border: 1px solid rgba(167,139,250,0.2); border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .tool-card:hover { border-color: var(--silence-glow); background: rgba(167,139,250,0.1); }
+    .tool-icon { width: 40px; height: 40px; margin: 0 auto 8px; color: var(--pop-blue); }
+    .tool-title { font-size: 0.8rem; font-weight: 800; color: #fff; }
 
     /* MODAL TOOLS */
     .tools-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
     .tools-modal.show { display: flex; }
-    .tools-content { background: var(--silence-card); border: 2px solid var(--silence-glow); border-radius: 20px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 40px rgba(124,58,237,0.4); position: relative; }
-    .tools-close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border-radius: 50%; background: var(--pop-red); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .tools-content { background: var(--silence-card); border: 2px solid var(--silence-glow); border-radius: 20px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 40px rgba(124,58,237,0.4); position: relative; max-height: 90vh; overflow-y: auto; }
+    .tools-close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border-radius: 50%; background: var(--pop-red); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;}
     .tools-title { font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
-    .tools-desc { font-size: 0.8rem; color: var(--silence-muted); margin-bottom: 15px; }
+    
     .ws-status { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--silence-card2); border-radius: 10px; margin-top: 15px; border: 1px solid rgba(167,139,250,0.2); }
     .ws-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--pop-red); }
     .ws-dot.connected { background: var(--pop-green); box-shadow: 0 0 10px var(--pop-green); }
     .ws-text { font-size: 0.8rem; font-weight: 700; }
+
+    /* QR & TT RESULT */
+    #qrResult { text-align: center; margin-top: 15px; }
+    #qrResult canvas { background: #fff; padding: 10px; border-radius: 10px; max-width: 100%; }
+    .tt-result { background: var(--silence-card2); border-radius: 10px; padding: 10px; margin-top: 15px; display: flex; gap: 10px; align-items: center; }
+    .tt-result img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+    .tt-info { flex: 1; text-align: left; }
+    .tt-title { font-size: 0.7rem; font-weight: 700; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 5px;}
+    .tt-btn { padding: 6px 12px; background: var(--pop-pink); color: #fff; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-decoration: none; display: inline-block; }
 
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--silence-card2); color: var(--silence-text); padding: 12px 18px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--silence-glow); box-shadow: 0 0 30px rgba(124,58,237,0.5); opacity: 0; pointer-events: none; transition: 0.25s; z-index: 300; text-align: center; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -168,37 +181,23 @@
       <div class="banner-pulse"></div>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-      <div class="s-section" style="padding:12px 14px;">
-        <div style="font-size:0.55rem; font-weight:800; color:var(--silence-muted); text-transform:uppercase;">Last Day</div>
-        <div style="font-family:var(--font-display); font-size:1.1rem; color:var(--silence-glow);" id="infoLastDay">0<small>d</small></div>
-      </div>
-      <div class="s-section" style="padding:12px 14px;">
-        <div style="font-size:0.55rem; font-weight:800; color:var(--silence-muted); text-transform:uppercase;">Murid</div>
-        <div style="font-family:var(--font-display); font-size:1.1rem; color:var(--silence-glow);" id="infoMurid">0</div>
-      </div>
-    </div>
-
     <div class="s-section">
-      <div class="s-section-head"><h2>Game Tools</h2></div>
+      <div class="s-section-head"><h2>Utility Tools</h2></div>
       <div class="s-section-body">
-        <div class="s-field"><label>No Target</label><input type="text" id="gameTarget" placeholder="08xxxxxxxxxx" inputmode="numeric"></div>
-        <div class="s-field"><label>Menu</label>
-          <select id="gameMenu"><option value="">— Pilih Menu —</option><option value="menu1">Menu 1</option><option value="menu2">Menu 2</option></select>
+        <div class="tools-grid">
+          <div class="tool-card" id="btnOpenWa">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <div class="tool-title">WA Sender</div>
+          </div>
+          <div class="tool-card" id="btnOpenTt">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/><line x1="15" y1="9" x2="15" y2="21"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+            <div class="tool-title">TikTok DL</div>
+          </div>
+          <div class="tool-card" id="btnOpenQr" style="grid-column: span 2;">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <div class="tool-title">QR Generator</div>
+          </div>
         </div>
-        <div class="s-field"><label>Sender</label>
-          <select id="gameSender"><option value="Diri Sendiri">Diri Sendiri</option><option value="Global">Global (Owner)</option></select>
-        </div>
-        <button class="s-btn" id="btnExecute">EXECUTE</button>
-        <div class="game-log" id="gameLog"><div class="log-empty">Belum ada history.</div></div>
-      </div>
-    </div>
-
-    <div class="s-section">
-      <div class="s-section-head"><h2>Tools (WhatsApp Sender)</h2></div>
-      <div class="s-section-body" style="text-align:center;">
-        <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Hubungkan nomor WhatsApp sebagai Sender menggunakan Pairing Code.</p>
-        <button class="s-btn" id="btnOpenTools" style="background:var(--silence-card2); border-color:var(--pop-blue); color:var(--pop-blue);">Buka Tools</button>
       </div>
     </div>
   </div>
@@ -207,27 +206,45 @@
   <div class="tools-modal" id="toolsModal">
     <div class="tools-content">
       <button class="tools-close" onclick="closeTools()">✕</button>
-      <h2 class="tools-title">WhatsApp Tools</h2>
       
-      <div id="toolsAuth">
-        <p class="tools-desc">Masukkan kode akses untuk membuka panel.</p>
-        <div class="s-field"><label>Access Code</label><input type="password" id="toolsCode" placeholder="Masukkan kode..."></div>
-        <button class="s-btn" id="btnAuthTools" style="margin-top:10px;">VERIFIKASI</button>
+      <!-- PANEL WA -->
+      <div id="panelWa" class="hidden">
+        <h2 class="tools-title">WA Sender</h2>
+        <div id="waAuth">
+          <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Masukkan kode akses.</p>
+          <div class="s-field"><input type="password" id="waCode" placeholder="Kode..."></div>
+          <button class="s-btn" id="btnAuthWa" style="margin-top:10px;">VERIFIKASI</button>
+        </div>
+        <div id="waPanel" class="hidden">
+          <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px; text-align:center;">Masukkan nomor WA (contoh: 628xxx)</p>
+          <div class="s-field"><input type="tel" id="waNumber" placeholder="Nomor WA" style="text-align:center;"></div>
+          <button class="s-btn" id="btnReqCode" style="margin-top:10px;">MINTA KODE</button>
+          <div id="waCodeDisplay" class="hidden" style="margin-top:15px; padding:15px; background:var(--silence-card2); border:1px dashed var(--pop-blue); border-radius:10px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--silence-muted);">Kode Pairing:</div>
+            <div id="waPairingText" style="font-family:var(--font-display); font-size:2rem; color:var(--pop-yellow); letter-spacing:2px;">----</div>
+          </div>
+          <div class="ws-status"><div class="ws-dot" id="wsDot"></div><div class="ws-text" id="wsText">Status: Offline</div></div>
+        </div>
       </div>
 
-      <div id="toolsPanel" class="hidden">
-        <p class="tools-desc" style="text-align:center;">Masukkan nomor WA (contoh: 628xxx) untuk mendapatkan kode pairing.</p>
-        <div class="s-field"><input type="tel" id="waNumber" placeholder="Nomor WhatsApp" style="text-align:center;"></div>
-        <button class="s-btn" id="btnRequestCode" style="margin-top:10px;">MINTA KODE PAIRING</button>
-        
-        <div id="codeDisplay" class="hidden" style="margin-top:20px; padding:15px; background:var(--silence-card2); border:1px dashed var(--pop-blue); border-radius:10px; text-align:center;">
-          <div style="font-size:0.7rem; color:var(--silence-muted); margin-bottom:5px;">Kode Pairing Lo:</div>
-          <div id="pairingCodeText" style="font-family:var(--font-display); font-size:2rem; color:var(--pop-yellow); letter-spacing:2px;">----</div>
-          <div style="font-size:0.65rem; color:var(--silence-muted); margin-top:5px;">Masukkan kode ini di WA > Tautkan Perangkat > Tautkan dengan nomor telepon</div>
-        </div>
-        
-        <div class="ws-status"><div class="ws-dot" id="wsDot"></div><div class="ws-text" id="wsText">Status: Menunggu koneksi...</div></div>
+      <!-- PANEL TIKTOK -->
+      <div id="panelTt" class="hidden">
+        <h2 class="tools-title">TikTok Downloader</h2>
+        <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Paste link video TikTok (tanpa watermark).</p>
+        <div class="s-field"><input type="text" id="ttUrl" placeholder="https://vt.tiktok.com/..." style="font-size:0.8rem;"></div>
+        <button class="s-btn" id="btnDlTt" style="margin-top:10px;">DOWNLOAD</button>
+        <div id="ttResultWrap"></div>
       </div>
+
+      <!-- PANEL QR CODE -->
+      <div id="panelQr" class="hidden">
+        <h2 class="tools-title">QR Generator</h2>
+        <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Ubah teks atau link jadi QR Code.</p>
+        <div class="s-field"><textarea id="qrText" placeholder="Ketik teks atau link di sini..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:var(--silence-card2); color:#fff; min-height:80px; resize:none; font-family:var(--font-body);"></textarea></div>
+        <button class="s-btn" id="btnGenQr" style="margin-top:10px;">GENERATE QR</button>
+        <div id="qrResult"></div>
+      </div>
+
     </div>
   </div>
 
@@ -235,18 +252,20 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script>
+    // ⚠️ KONFIGURASI
     const SUPABASE_URL = 'https://lxdjnzsbunkkwjkltabt.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_W9AFHz0Z3M0YhpVRgLsbbQ_L8iUd-q1';
     const STORAGE_KEY = 'dx_silence_unlocked';
-    const WS_URL = 'wss://URL-RAILWAY-LO.up.railway.app'; // ⚠️ GANTI URL INI
+    
+    // GANTI URL INI PAKE URL RAILWAY LO (Harus pakai wss:// kalau udah online, atau ws://localhost:3000 kalau lokal)
+    const WS_URL = 'wss://URL-RAILWAY-LO.up.railway.app'; 
 
     let supaClient = null, currentUser = null, userRole = 'user', isOwner = false;
     
-    // Toast & Helpers
+    // Helpers
     let toastTimer;
     function toast(msg, type = '') { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show ' + type; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000); }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-
     async function connectSupabase() {
       return new Promise((resolve) => {
         if (window.supabase && window.supabase.createClient) { supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); resolve(true); return; }
@@ -282,48 +301,105 @@
       setProgress(100, 'Bypass siap.'); setTimeout(() => { showScreen('dashboardScreen'); initDashboard(profile?.nickname || 'User', profile?.avatar_url, count || 0); }, 500);
     }
 
-    // DASHBOARD INIT
+    // DASHBOARD
     function initDashboard(nickname, avatarUrl, muridCount) {
       document.getElementById('welcomeName').textContent = nickname;
       const av = document.getElementById('welcomeAvatar');
       if (avatarUrl) av.innerHTML = `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`; else av.textContent = nickname.charAt(0).toUpperCase();
-      document.getElementById('badgeRole').textContent = userRole.toUpperCase(); document.getElementById('infoLastDay').innerHTML = isOwner ? `999<small>d</small>` : `0<small>d</small>`; document.getElementById('infoMurid').textContent = muridCount;
-      wireGame(); wireTools();
+      document.getElementById('badgeRole').textContent = userRole.toUpperCase(); 
+      document.getElementById('infoLastDay').innerHTML = isOwner ? `999<small>d</small>` : `0<small>d</small>`; 
+      document.getElementById('infoMurid').textContent = muridCount;
+      wireTools();
     }
 
-    // GAME LOGIC (Placeholder)
-    function wireGame() {
-      document.getElementById('btnExecute').addEventListener('click', () => { toast('Game executed!', 'success'); });
-    }
-
-    // TOOLS (PAIRING CODE)
+    // ==========================================
+    // LOGIC SEMUA TOOLS
+    // ==========================================
     function wireTools() {
-      const btnOpen = document.getElementById('btnOpenTools'), modal = document.getElementById('toolsModal'), toolsAuth = document.getElementById('toolsAuth'), toolsPanel = document.getElementById('toolsPanel'), toolsCode = document.getElementById('toolsCode'), btnAuth = document.getElementById('btnAuthTools'), waNumber = document.getElementById('waNumber'), btnRequestCode = document.getElementById('btnRequestCode'), codeDisplay = document.getElementById('codeDisplay'), pairingCodeText = document.getElementById('pairingCodeText'), wsDot = document.getElementById('wsDot'), wsText = document.getElementById('wsText');
+      const modal = document.getElementById('toolsModal');
+      const panelWa = document.getElementById('panelWa');
+      const panelTt = document.getElementById('panelTt');
+      const panelQr = document.getElementById('panelQr');
+
+      window.closeTools = () => { 
+        modal.classList.remove('show'); 
+        panelWa.classList.add('hidden'); panelTt.classList.add('hidden'); panelQr.classList.add('hidden');
+      };
+
+      // Buka Modal
+      document.getElementById('btnOpenWa').addEventListener('click', () => { modal.classList.add('show'); panelWa.classList.remove('hidden'); });
+      document.getElementById('btnOpenTt').addEventListener('click', () => { modal.classList.add('show'); panelTt.classList.remove('hidden'); });
+      document.getElementById('btnOpenQr').addEventListener('click', () => { modal.classList.add('show'); panelQr.classList.remove('hidden'); });
+
+      // --- 1. WHATSAPP TOOLS ---
+      const waAuth = document.getElementById('waAuth'), waPanel = document.getElementById('waPanel'), waCode = document.getElementById('waCode'), btnAuthWa = document.getElementById('btnAuthWa'), waNumber = document.getElementById('waNumber'), btnReqCode = document.getElementById('btnReqCode'), waCodeDisplay = document.getElementById('waCodeDisplay'), waPairingText = document.getElementById('waPairingText'), wsDot = document.getElementById('wsDot'), wsText = document.getElementById('wsText');
       let ws = null;
 
-      btnOpen.addEventListener('click', () => { modal.classList.add('show'); toolsAuth.classList.remove('hidden'); toolsPanel.classList.add('hidden'); toolsCode.value = ''; codeDisplay.classList.add('hidden'); pairingCodeText.textContent = '----'; });
-      window.closeTools = () => { modal.classList.remove('show'); if(ws) ws.close(); };
+      btnAuthWa.addEventListener('click', () => {
+        if (waCode.value.trim() === 'DERU-XEON') { waAuth.classList.add('hidden'); waPanel.classList.remove('hidden'); toast('Akses diterima!', 'success'); } 
+        else { toast('Kode akses salah!', 'error'); }
+      });
 
-      btnAuth.addEventListener('click', () => { if (toolsCode.value.trim() === 'DERU-XEON') { toolsAuth.classList.add('hidden'); toolsPanel.classList.remove('hidden'); toast('Akses diterima!', 'success'); } else { toast('Kode akses salah!', 'error'); } });
-
-      btnRequestCode.addEventListener('click', () => {
+      btnReqCode.addEventListener('click', () => {
         const phone = waNumber.value.trim();
-        if (!phone) return toast('Masukkan nomor WA dulu!', 'error');
-        btnRequestCode.textContent = 'MEMINTA KODE...'; btnRequestCode.disabled = true;
+        if (!phone) return toast('Masukkan nomor WA!', 'error');
+        btnReqCode.textContent = 'MEMINTA...'; btnReqCode.disabled = true;
 
         ws = new WebSocket(WS_URL);
-        ws.onopen = () => { ws.send(JSON.stringify({ type: 'request_pairing', phone: phone })); wsText.textContent = 'Meminta kode dari server...'; };
+        ws.onopen = () => { ws.send(JSON.stringify({ type: 'request_pairing', phone: phone })); wsText.textContent = 'Meminta kode...'; };
         ws.onmessage = (event) => {
           const msg = JSON.parse(event.data);
           if (msg.type === 'pairing_code') {
-            codeDisplay.classList.remove('hidden'); pairingCodeText.textContent = msg.data; btnRequestCode.textContent = 'MINTA ULANG'; btnRequestCode.disabled = false; wsText.textContent = 'Menunggu lo masukin kode di WA...';
+            waCodeDisplay.classList.remove('hidden'); waPairingText.textContent = msg.data; btnReqCode.textContent = 'MINTA ULANG'; btnReqCode.disabled = false; wsText.textContent = 'Masukkan kode di WA...';
           } else if (msg.type === 'status' && msg.data === 'connected') {
-            wsDot.classList.add('connected'); wsText.textContent = 'WhatsApp Berhasil Terhubung!'; codeDisplay.classList.add('hidden'); toast('Sender WhatsApp siap!', 'success');
-          } else if (msg.type === 'error') {
-            toast('Error: ' + msg.data, 'error'); btnRequestCode.textContent = 'COBA LAGI'; btnRequestCode.disabled = false;
-          }
+            wsDot.classList.add('connected'); wsText.textContent = 'WhatsApp Terhubung!'; waCodeDisplay.classList.add('hidden'); toast('Sender siap!', 'success');
+          } else if (msg.type === 'error') { toast('Error: ' + msg.data, 'error'); btnReqCode.textContent = 'COBA LAGI'; btnReqCode.disabled = false; }
         };
-        ws.onerror = () => { toast('Gagal konek ke server WebSocket', 'error'); btnRequestCode.textContent = 'COBA LAGI'; btnRequestCode.disabled = false; };
+        ws.onerror = () => { toast('Gagal konek server', 'error'); btnReqCode.textContent = 'COBA LAGI'; btnReqCode.disabled = false; };
+      });
+
+      // --- 2. TIKTOK DOWNLOADER ---
+      const btnDlTt = document.getElementById('btnDlTt'), ttUrl = document.getElementById('ttUrl'), ttResultWrap = document.getElementById('ttResultWrap');
+      btnDlTt.addEventListener('click', async () => {
+        const url = ttUrl.value.trim();
+        if (!url) return toast('Paste link TikTok dulu!', 'error');
+        btnDlTt.textContent = 'MENGUNDUH...'; btnDlTt.disabled = true; ttResultWrap.innerHTML = '';
+        try {
+          const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.code === 0 && data.data) {
+            const vid = data.data;
+            ttResultWrap.innerHTML = `
+              <div class="tt-result">
+                <img src="${vid.cover}" alt="Cover">
+                <div class="tt-info">
+                  <div class="tt-title">${vid.title || 'Tanpa Judul'}</div>
+                  <a href="${vid.play}" target="_blank" class="tt-btn" download>DOWNLOAD MP4</a>
+                </div>
+              </div>`;
+            toast('Berhasil!', 'success');
+          } else {
+            ttResultWrap.innerHTML = `<div style="color:var(--pop-red); font-size:0.8rem; text-align:center;">Gagal ngambil video. Cek link atau coba lagi nanti.</div>`;
+          }
+        } catch (err) {
+          ttResultWrap.innerHTML = `<div style="color:var(--pop-red); font-size:0.8rem; text-align:center;">Error koneksi ke API TikTok.</div>`;
+        } finally { btnDlTt.textContent = 'DOWNLOAD'; btnDlTt.disabled = false; }
+      });
+
+      // --- 3. QR CODE GENERATOR ---
+      const btnGenQr = document.getElementById('btnGenQr'), qrText = document.getElementById('qrText'), qrResult = document.getElementById('qrResult');
+      btnGenQr.addEventListener('click', () => {
+        const text = qrText.value.trim();
+        if (!text) return toast('Isi teks/link dulu!', 'error');
+        qrResult.innerHTML = '';
+        QRCode.toCanvas(text, { width: 200, margin: 1, color: { dark: '#1A1726', light: '#ffffff' } }, function (error, canvas) {
+          if (error) { toast('Gagal generate QR', 'error'); return; }
+          qrResult.appendChild(canvas);
+          const downloadBtn = document.createElement('button');
+          downloadBtn.className = 's-btn small'; downloadBtn.style.marginTop = '10px'; downloadBtn.textContent = 'DOWNLOAD GAMBAR';
+          downloadBtn.onclick = () => { const a = document.createElement('a'); a.href = canvas.toDataURL("image/png"); a.download = 'deruxeon-qr.png'; a.click(); };
+          qrResult.appendChild(downloadBtn);
+        });
       });
     }
 
