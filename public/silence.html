@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#08080C">
+  <title>DeruXeon — Silence Mode</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Library QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --pop-yellow: #FFD93D; --pop-pink: #FF6B9D; --pop-blue: #4ECDC4; --pop-red: #FF5252; --pop-purple: #A78BFA; --pop-green: #86EFAC;
+      --silence-bg: #08080C; --silence-card: #12101A; --silence-card2: #1A1726; --silence-accent: #7C3AED; --silence-glow: #A78BFA; --silence-text: #E5E7EB; --silence-muted: #8B8B9E;
+      --space-xs: 0.5rem; --space-sm: 1rem; --space-md: 1.5rem;
+      --font-display: 'Bangers', 'Impact', cursive; --font-body: 'Nunito', system-ui, -apple-system, sans-serif;
+      --app-max-width: 430px; --app-pad: 1.25rem;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); font-weight: 600; font-size: 16px; line-height: 1.6; color: var(--silence-text); background-color: var(--silence-bg); background-image: radial-gradient(circle at 20% 10%, rgba(124,58,237,0.15), transparent 40%), radial-gradient(circle at 80% 90%, rgba(167,139,250,0.12), transparent 40%), radial-gradient(circle at 1px 1px, rgba(167,139,250,0.06) 1px, transparent 0); background-size: auto, auto, 12px 12px; -webkit-font-smoothing: antialiased; min-height: 100dvh; display: flex; justify-content: center; }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1; color: #F2EDE0; }
+    a { color: inherit; text-decoration: none; } button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: none; cursor: pointer; } input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; outline: none; }
+    .hidden { display: none !important; }
+
+    /* SCREEN MANAGER */
+    .screen { display: none; flex-direction: column; width: 100%; max-width: var(--app-max-width); min-height: 100dvh; padding: var(--space-md) var(--app-pad); margin: 0 auto; animation: fadeIn 0.4s ease; }
+    .screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 1. GATE */
+    #gateScreen { align-items: center; justify-content: center; text-align: center; gap: var(--space-md); }
+    .gate-lock { width: 100px; height: 100px; border-radius: 24px; background: linear-gradient(135deg, var(--silence-accent), #4C1D95); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(124,58,237,0.6); animation: pulse-glow 2.5s infinite; margin-bottom: 8px; }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 40px rgba(124,58,237,0.6); } 50% { box-shadow: 0 0 60px rgba(167,139,250,0.9); } }
+    .gate-lock svg { width: 48px; height: 48px; color: #F2EDE0; }
+    .gate-title { font-size: 2.4rem; text-shadow: 0 0 30px rgba(167,139,250,0.7); }
+    .gate-sub { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--silence-muted); }
+    .gate-form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; margin-top: var(--space-md); }
+    .gate-field label { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--silence-muted); margin-bottom: 6px; text-align: left; }
+    .gate-field input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 2px solid rgba(167,139,250,0.3); background: var(--silence-card2); color: var(--silence-text); font-size: 0.9rem; font-weight: 700; text-align: center; letter-spacing: 0.1em; transition: 0.2s; }
+    .gate-field input:focus { border-color: var(--silence-glow); box-shadow: 0 0 0 3px rgba(167,139,250,0.2); }
+    .gate-field.has-error input { border-color: var(--pop-red); box-shadow: 0 0 0 3px rgba(255,82,82,0.2); }
+    .gate-error { display: none; font-size: 0.72rem; font-weight: 700; color: var(--pop-red); margin-top: -4px; }
+    .gate-error.show { display: block; }
+    .gate-btn { width: 100%; padding: 15px; border-radius: 12px; background: linear-gradient(135deg, var(--silence-accent), #4C1D95); border: 2px solid var(--silence-glow); color: #F2EDE0; font-family: var(--font-display); font-size: 1.3rem; box-shadow: 0 6px 0 rgba(76,29,149,0.6); transition: 0.15s; margin-top: 6px; }
+    .gate-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(76,29,149,0.6); }
+    .gate-btn:disabled { opacity: 0.6; transform: none; }
+    .gate-back { margin-top: var(--space-sm); font-size: 0.75rem; font-weight: 800; color: var(--silence-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    /* 2. LOADING */
+    #loadingScreen { align-items: center; justify-content: center; text-align: center; gap: var(--space-md); }
+    .load-logo { width: 90px; height: 90px; border-radius: 22px; background: linear-gradient(135deg, var(--silence-accent), #4C1D95); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px rgba(124,58,237,0.6); }
+    .load-logo svg { width: 44px; height: 44px; color: #F2EDE0; }
+    .load-title { font-size: 2rem; text-shadow: 0 0 20px rgba(167,139,250,0.6); }
+    .load-progress-wrap { width: 100%; max-width: 280px; margin-top: 8px; }
+    .load-progress-track { width: 100%; height: 12px; border-radius: 6px; background: var(--silence-card2); border: 1px solid rgba(167,139,250,0.3); overflow: hidden; }
+    .load-progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--silence-accent), var(--silence-glow)); transition: width 0.2s; box-shadow: 0 0 10px rgba(167,139,250,0.8); }
+    .load-percent { font-family: var(--font-display); font-size: 1.1rem; color: var(--silence-glow); margin-top: 10px; }
+    .load-status { font-size: 0.7rem; color: var(--silence-muted); margin-top: 6px; font-weight: 700; }
+
+    /* 3. DASHBOARD */
+    #dashboardScreen { gap: var(--space-md); }
+    
+    /* BANNER PROFIL */
+    .topbar-wrap { position: relative; margin-bottom: 15px; }
+    .banner-bg { 
+      width: 100%; height: 120px; 
+      background-image: url('banner-silence.jpg'); 
+      background-size: cover; 
+      background-position: center; 
+      border-radius: 16px; 
+      border: 2px solid var(--silence-glow); 
+      box-shadow: 0 0 30px rgba(124,58,237,0.4); 
+      position: relative; 
+      overflow: hidden; 
+    }
+    .banner-bg::after { 
+      content: ''; 
+      position: absolute; 
+      inset: 0; 
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
+    }
+    .profile-header { position: relative; padding: 0 15px; margin-top: -40px; display: flex; align-items: flex-end; gap: 15px; z-index: 2; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--silence-card2); border: 4px solid var(--silence-bg); box-shadow: 0 0 20px rgba(167,139,250,0.4); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 2.5rem; color: var(--silence-glow); flex-shrink: 0; overflow: hidden; }
+    .profile-info { padding-bottom: 5px; }
+    .profile-name { font-family: var(--font-display); font-size: 1.5rem; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+    .profile-role { font-size: 0.7rem; font-weight: 800; color: var(--silence-glow); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+    .bypass-banner { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: linear-gradient(135deg, #7C3AED, #4C1D95); border-radius: 12px; border: 2px solid var(--silence-glow); box-shadow: 0 0 25px rgba(124,58,237,0.5); position: relative; overflow: hidden; margin-top: 5px; }
+    .bypass-banner::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #fff, transparent); animation: scan 2.5s linear infinite; opacity: 0.6; }
+    @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    .banner-icon { width: 32px; height: 32px; color: var(--pop-yellow); }
+    .banner-text { flex: 1; }
+    .banner-title { font-family: var(--font-display); font-size: 1rem; color: #F2EDE0; }
+    .banner-sub { font-size: 0.6rem; font-weight: 800; color: rgba(242,237,224,0.7); margin-top: 3px; }
+    .banner-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--pop-green); box-shadow: 0 0 12px var(--pop-green); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .s-section { background: var(--silence-card); border: 1px solid rgba(167,139,250,0.2); border-radius: 14px; overflow: hidden; }
+    .s-section-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--silence-card2); border-bottom: 1px solid rgba(167,139,250,0.15); }
+    .s-section-head h2 { font-size: 1.05rem; }
+    .s-section-head svg { width: 18px; height: 18px; color: var(--silence-glow); }
+    .s-section-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    
+    .s-field label { display: block; font-size: 0.62rem; font-weight: 800; color: var(--silence-muted); margin-bottom: 5px; text-transform: uppercase; }
+    .s-field input, .s-field select, .s-field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(167,139,250,0.25); background: var(--silence-card2); color: var(--silence-text); font-weight: 600; }
+    .s-field input:focus, .s-field select:focus, .s-field textarea:focus { border-color: var(--silence-glow); }
+    .s-btn { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--silence-accent), #4C1D95); border: 1px solid var(--silence-glow); color: #F2EDE0; font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.06em; box-shadow: 0 3px 0 rgba(76,29,149,0.6); transition: 0.1s; }
+    .s-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(76,29,149,0.6); }
+    .s-btn:disabled { opacity: 0.6; transform: none; }
+    .s-btn.small { font-size: 0.85rem; padding: 9px; }
+    
+    /* GAME LOG */
+    .game-log { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; margin-top: 10px; }
+    .log-item { padding: 8px 12px; background: var(--silence-card2); border-left: 3px solid var(--silence-glow); border-radius: 4px; font-size: 0.75rem; }
+    .log-item .log-time { font-size: 0.6rem; color: var(--silence-muted); margin-top: 2px; }
+    .log-empty { text-align: center; font-size: 0.7rem; color: var(--silence-muted); padding: 10px; }
+
+    /* TOOLS GRID */
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tool-card { padding: 15px; background: var(--silence-card2); border: 1px solid rgba(167,139,250,0.2); border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .tool-card:hover { border-color: var(--silence-glow); background: rgba(167,139,250,0.1); }
+    .tool-icon { width: 40px; height: 40px; margin: 0 auto 8px; color: var(--pop-blue); }
+    .tool-title { font-size: 0.8rem; font-weight: 800; color: #fff; }
+
+    /* MODAL TOOLS */
+    .tools-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+    .tools-modal.show { display: flex; }
+    .tools-content { background: var(--silence-card); border: 2px solid var(--silence-glow); border-radius: 20px; width: 100%; max-width: 380px; padding: 20px; box-shadow: 0 0 40px rgba(124,58,237,0.4); position: relative; max-height: 90vh; overflow-y: auto; }
+    .tools-close { position: absolute; top: 15px; right: 15px; width: 30px; height: 30px; border-radius: 50%; background: var(--pop-red); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 10;}
+    .tools-title { font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
+    
+    .ws-status { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--silence-card2); border-radius: 10px; margin-top: 15px; border: 1px solid rgba(167,139,250,0.2); }
+    .ws-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--pop-red); }
+    .ws-dot.connected { background: var(--pop-green); box-shadow: 0 0 10px var(--pop-green); }
+    .ws-text { font-size: 0.8rem; font-weight: 700; }
+
+    /* QR & TT RESULT */
+    #qrResult { text-align: center; margin-top: 15px; }
+    #qrResult canvas { background: #fff; padding: 10px; border-radius: 10px; max-width: 100%; }
+    .tt-result { background: var(--silence-card2); border-radius: 10px; padding: 10px; margin-top: 15px; display: flex; gap: 10px; align-items: center; }
+    .tt-result img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+    .tt-info { flex: 1; text-align: left; }
+    .tt-title { font-size: 0.7rem; font-weight: 700; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 5px;}
+    .tt-btn { padding: 6px 12px; background: var(--pop-pink); color: #fff; border-radius: 6px; font-size: 0.7rem; font-weight: 800; text-decoration: none; display: inline-block; }
+
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--silence-card2); color: var(--silence-text); padding: 12px 18px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--silence-glow); box-shadow: 0 0 30px rgba(124,58,237,0.5); opacity: 0; pointer-events: none; transition: 0.25s; z-index: 300; text-align: center; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: var(--pop-red); color: #FCA5A5; }
+    .toast.success { border-color: var(--pop-green); color: var(--pop-green); }
+  </style>
+</head>
+<body>
+
+  <!-- 1. GATE -->
+  <div class="screen active" id="gateScreen">
+    <div class="gate-lock"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <h1 class="gate-title">SILENCE MODE</h1>
+    <p class="gate-sub">Restricted Access</p>
+    <form class="gate-form" id="gateForm" novalidate>
+      <div class="gate-field" id="fieldPass">
+        <label>Password</label><input type="password" id="gatePass" placeholder="Password" autocomplete="off">
+      </div>
+      <div class="gate-field" id="fieldBypass">
+        <label>Bypass Code</label><input type="password" id="gateBypass" placeholder="Bypass Code" autocomplete="off">
+      </div>
+      <span class="gate-error" id="gateError"></span>
+      <button type="submit" class="gate-btn" id="gateBtn"><span id="gateBtnText">UNLOCK</span></button>
+    </form>
+    <a href="dashboard.html" class="gate-back"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Kembali</a>
+  </div>
+
+  <!-- 2. LOADING -->
+  <div class="screen" id="loadingScreen">
+    <div class="load-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <h2 class="load-title">Memuat Data…</h2>
+    <div class="load-progress-wrap">
+      <div class="load-progress-track"><div class="load-progress-fill" id="loadFill"></div></div>
+      <div class="load-percent" id="loadPercent">0%</div>
+      <div class="load-status" id="loadStatus">Menghubungkan ke server…</div>
+    </div>
+  </div>
+
+  <!-- 3. DASHBOARD -->
+  <div class="screen" id="dashboardScreen">
+    <div class="topbar-wrap">
+      <div class="banner-bg"></div>
+      <div class="profile-header">
+        <div class="profile-avatar" id="welcomeAvatar">?</div>
+        <div class="profile-info">
+          <div class="profile-name" id="welcomeName">User</div>
+          <div class="profile-role" id="badgeRole">USER</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bypass-banner">
+      <svg class="banner-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div class="banner-text"><div class="banner-title">BYPASS ACTIVE</div><div class="banner-sub">Silence Mode · Private Access</div></div>
+      <div class="banner-pulse"></div>
+    </div>
+
+    <!-- GAME MENU -->
+    <div class="s-section">
+      <div class="s-section-head"><h2>Game Tools</h2></div>
+      <div class="s-section-body">
+        <div class="s-field"><label>No Target</label><input type="text" id="gameTarget" placeholder="08xxxxxxxxxx" inputmode="numeric"></div>
+        <div class="s-field"><label>Menu</label>
+          <select id="gameMenu">
+            <option value="">— Pilih Menu —</option>
+            <option value="menu1">Menu 1</option>
+            <option value="menu2">Menu 2</option>
+          </select>
+        </div>
+        <div class="s-field"><label>Sender</label>
+          <select id="gameSender">
+            <option value="Diri Sendiri">Diri Sendiri</option>
+            <option value="Global">Global (Owner)</option>
+          </select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <button class="s-btn small" id="btnPrivate" style="background:var(--silence-accent)">Private</button>
+          <button class="s-btn small" id="btnGlobal">Global</button>
+        </div>
+        <button class="s-btn" id="btnExecute">EXECUTE</button>
+        <div class="game-log" id="gameLog"><div class="log-empty">Belum ada history.</div></div>
+      </div>
+    </div>
+
+    <!-- UTILITY TOOLS -->
+    <div class="s-section">
+      <div class="s-section-head"><h2>Utility Tools</h2></div>
+      <div class="s-section-body">
+        <div class="tools-grid">
+          <div class="tool-card" id="btnOpenWa">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            <div class="tool-title">WA Sender</div>
+          </div>
+          <div class="tool-card" id="btnOpenTt">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/><line x1="15" y1="9" x2="15" y2="21"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+            <div class="tool-title">TikTok DL</div>
+          </div>
+          <div class="tool-card" id="btnOpenQr" style="grid-column: span 2;">
+            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <div class="tool-title">QR Generator</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TOOLS -->
+  <div class="tools-modal" id="toolsModal">
+    <div class="tools-content">
+      <button class="tools-close" onclick="closeTools()">✕</button>
+      
+      <!-- PANEL WA -->
+      <div id="panelWa" class="hidden">
+        <h2 class="tools-title">WA Sender</h2>
+        <div id="waAuth">
+          <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Masukkan kode akses.</p>
+          <div class="s-field"><input type="password" id="waCode" placeholder="Kode..."></div>
+          <button class="s-btn" id="btnAuthWa" style="margin-top:10px;">VERIFIKASI</button>
+        </div>
+        <div id="waPanel" class="hidden">
+          <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px; text-align:center;">Masukkan nomor WA (contoh: 628xxx)</p>
+          <div class="s-field"><input type="tel" id="waNumber" placeholder="Nomor WA" style="text-align:center;"></div>
+          <button class="s-btn" id="btnReqCode" style="margin-top:10px;">MINTA KODE</button>
+          <div id="waCodeDisplay" class="hidden" style="margin-top:15px; padding:15px; background:var(--silence-card2); border:1px dashed var(--pop-blue); border-radius:10px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--silence-muted);">Kode Pairing:</div>
+            <div id="waPairingText" style="font-family:var(--font-display); font-size:2rem; color:var(--pop-yellow); letter-spacing:2px;">----</div>
+          </div>
+          <div class="ws-status"><div class="ws-dot" id="wsDot"></div><div class="ws-text" id="wsText">Status: Offline</div></div>
+        </div>
+      </div>
+
+      <!-- PANEL TIKTOK -->
+      <div id="panelTt" class="hidden">
+        <h2 class="tools-title">TikTok Downloader</h2>
+        <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Paste link video TikTok (tanpa watermark).</p>
+        <div class="s-field"><input type="text" id="ttUrl" placeholder="https://vt.tiktok.com/..." style="font-size:0.8rem;"></div>
+        <button class="s-btn" id="btnDlTt" style="margin-top:10px;">DOWNLOAD</button>
+        <div id="ttResultWrap"></div>
+      </div>
+
+      <!-- PANEL QR CODE -->
+      <div id="panelQr" class="hidden">
+        <h2 class="tools-title">QR Generator</h2>
+        <p style="font-size:0.8rem; color:var(--silence-muted); margin-bottom:10px;">Ubah teks atau link jadi QR Code.</p>
+        <div class="s-field"><textarea id="qrText" placeholder="Ketik teks atau link di sini..." style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(167,139,250,0.25); background:var(--silence-card2); color:#fff; min-height:80px; resize:none; font-family:var(--font-body);"></textarea></div>
+        <button class="s-btn" id="btnGenQr" style="margin-top:10px;">GENERATE QR</button>
+        <div id="qrResult"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script>
+    // ⚠️ KONFIGURASI
+    const SUPABASE_URL = 'https://lxdjnzsbunkkwjkltabt.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_W9AFHz0Z3M0YhpVRgLsbbQ_L8iUd-q1';
+    const STORAGE_KEY = 'dx_silence_unlocked';
+    
+    // URL RAILWAY LO
+    const WS_URL = 'wss://DeruXeon.up.railway.app'; 
+
+    let supaClient = null, currentUser = null, userRole = 'user', isOwner = false;
+    let gameMode = 'private';
+    
+    // Helpers
+    let toastTimer;
+    function toast(msg, type = '') { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show ' + type; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000); }
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    async function connectSupabase() {
+      return new Promise((resolve) => {
+        if (window.supabase && window.supabase.createClient) { supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); resolve(true); return; }
+        let tries = 0; const timer = setInterval(() => { tries++; if (window.supabase && window.supabase.createClient) { clearInterval(timer); supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); resolve(true); } if (tries >= 80) { clearInterval(timer); resolve(false); } }, 100);
+      });
+    }
+
+    // GATE LOGIC
+    (function gateModule() {
+      const form = document.getElementById('gateForm'), passInput = document.getElementById('gatePass'), byPassInp = document.getElementById('gateBypass'), fieldPass = document.getElementById('fieldPass'), fieldByp = document.getElementById('fieldBypass'), gateError = document.getElementById('gateError'), gateBtn = document.getElementById('gateBtn'), gateBtnTxt = document.getElementById('gateBtnText');
+      if (sessionStorage.getItem(STORAGE_KEY) === '1') { showScreen('loadingScreen'); runLoadingSequence(); return; }
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault(); const pass = passInput.value.trim(), bypass = byPassInp.value.trim();
+        fieldPass.classList.remove('has-error'); fieldByp.classList.remove('has-error'); gateError.classList.remove('show');
+        if (!pass || !bypass) { if (!pass) fieldPass.classList.add('has-error'); if (!bypass) fieldByp.classList.add('has-error'); gateError.textContent = 'Wajib isi keduanya.'; gateError.classList.add('show'); return; }
+        gateBtn.disabled = true; gateBtnTxt.textContent = 'VERIFYING…';
+        const ok = await connectSupabase();
+        if (!ok) { toast('Koneksi server gagal', 'error'); gateBtn.disabled = false; gateBtnTxt.textContent = 'UNLOCK'; return; }
+        const { data: isValid } = await supaClient.rpc('check_silence_access', { p_pass: pass, p_bypass: bypass });
+        if (isValid) { sessionStorage.setItem(STORAGE_KEY, '1'); showScreen('loadingScreen'); runLoadingSequence(); } 
+        else { fieldPass.classList.add('has-error'); fieldByp.classList.add('has-error'); gateError.textContent = 'Password / Bypass salah.'; gateError.classList.add('show'); toast('Access denied', 'error'); gateBtn.disabled = false; gateBtnTxt.textContent = 'UNLOCK'; }
+      });
+    })();
+
+    // LOADING
+    async function runLoadingSequence() {
+      const fill = document.getElementById('loadFill'), percent = document.getElementById('loadPercent'), status = document.getElementById('loadStatus');
+      let current = 0; function setProgress(val, text) { current = val; fill.style.width = current + '%'; percent.textContent = Math.floor(current) + '%'; if (text) status.textContent = text; }
+      setProgress(20, 'Menghubungkan ke server…'); if (!supaClient) { const ok = await connectSupabase(); if (!ok) { status.textContent = 'Gagal konek ke server.'; status.style.color = 'var(--pop-red)'; return; } }
+      setProgress(40, 'Memeriksa sesi login…'); const { data: { session } } = await supaClient.auth.getSession(); if (!session) { status.textContent = 'Sesi tidak ditemukan. Redirect…'; setTimeout(() => window.location.href = 'login.html', 1500); return; } currentUser = session.user;
+      setProgress(60, 'Memuat profil user…'); const { data: profile } = await supaClient.from('profiles').select('nickname, role, avatar_url').eq('id', currentUser.id).maybeSingle(); userRole = profile?.role || 'user'; isOwner = userRole === 'owner';
+      setProgress(80, 'Menghitung murid…'); const { count } = await supaClient.from('verified_murid').select('*', { count: 'exact', head: true });
+      setProgress(100, 'Bypass siap.'); setTimeout(() => { showScreen('dashboardScreen'); initDashboard(profile?.nickname || 'User', profile?.avatar_url, count || 0); }, 500);
+    }
+
+    // DASHBOARD INIT
+    function initDashboard(nickname, avatarUrl, muridCount) {
+      document.getElementById('welcomeName').textContent = nickname;
+      const av = document.getElementById('welcomeAvatar');
+      if (avatarUrl) av.innerHTML = `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`; else av.textContent = nickname.charAt(0).toUpperCase();
+      document.getElementById('badgeRole').textContent = userRole.toUpperCase(); 
+      wireGame();
+      wireTools();
+      loadGameHistory();
+    }
+
+    // ==========================================
+    // GAME TOOLS LOGIC
+    // ==========================================
+    function wireGame() {
+      const target = document.getElementById('gameTarget');
+      const menu = document.getElementById('gameMenu');
+      const sender = document.getElementById('gameSender');
+      const btnExec = document.getElementById('btnExecute');
+      const btnPriv = document.getElementById('btnPrivate');
+      const btnGlob = document.getElementById('btnGlobal');
+      
+      btnPriv.addEventListener('click', () => { gameMode = 'private'; toast('Mode: Private'); });
+      btnGlob.addEventListener('click', () => {
+        if (!isOwner) return toast('Global hanya untuk owner', 'error');
+        gameMode = 'global'; toast('Mode: Global');
+      });
+
+      target.addEventListener('input', () => { target.value = target.value.replace(/[^\d]/g, ''); });
+
+      btnExec.addEventListener('click', async () => {
+        const tgt = target.value.trim();
+        const mnu = menu.value;
+        const snd = sender.value;
+        if (!tgt || !mnu || !snd) return toast('Lengkapi semua field', 'error');
+        btnExec.disabled = true; btnExec.textContent = 'EXECUTING…';
+
+        const { error } = await supaClient.from('game_requests').insert({
+          user_id: currentUser.id, target: tgt, menu: mnu, sender: snd, mode: gameMode
+        });
+
+        btnExec.disabled = false; btnExec.textContent = 'EXECUTE';
+
+        if (error) { console.error(error); return toast('Gagal execute: ' + error.message, 'error'); }
+        toast('Game executed!', 'success');
+        loadGameHistory();
+      });
+    }
+
+    async function loadGameHistory() {
+      const log = document.getElementById('gameLog');
+      log.innerHTML = '<div class="log-empty">Memuat history...</div>';
+      const { data, error } = await supaClient.from('game_requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
+      if (error || !data || data.length === 0) { log.innerHTML = '<div class="log-empty">Belum ada history.</div>'; return; }
+      log.innerHTML = data.map(item => {
+        const date = new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        return `<div class="log-item"><div><b>${item.menu}</b> → ${item.target} (${item.mode})</div><div class="log-time">${date} · ${item.sender}</div></div>`;
+      }).join('');
+    }
+
+    // ==========================================
+    // UTILITY TOOLS LOGIC
+    // ==========================================
+    function wireTools() {
+      const modal = document.getElementById('toolsModal');
+      const panelWa = document.getElementById('panelWa');
+      const panelTt = document.getElementById('panelTt');
+      const panelQr = document.getElementById('panelQr');
+
+      window.closeTools = () => { 
+        modal.classList.remove('show'); 
+        panelWa.classList.add('hidden'); panelTt.classList.add('hidden'); panelQr.classList.add('hidden');
+      };
+
+      document.getElementById('btnOpenWa').addEventListener('click', () => { modal.classList.add('show'); panelWa.classList.remove('hidden'); });
+      document.getElementById('btnOpenTt').addEventListener('click', () => { modal.classList.add('show'); panelTt.classList.remove('hidden'); });
+      document.getElementById('btnOpenQr').addEventListener('click', () => { modal.classList.add('show'); panelQr.classList.remove('hidden'); });
+
+      // --- 1. WHATSAPP TOOLS ---
+      const waAuth = document.getElementById('waAuth'), waPanel = document.getElementById('waPanel'), waCode = document.getElementById('waCode'), btnAuthWa = document.getElementById('btnAuthWa'), waNumber = document.getElementById('waNumber'), btnReqCode = document.getElementById('btnReqCode'), waCodeDisplay = document.getElementById('waCodeDisplay'), waPairingText = document.getElementById('waPairingText'), wsDot = document.getElementById('wsDot'), wsText = document.getElementById('wsText');
+      let ws = null;
+
+      btnAuthWa.addEventListener('click', () => {
+        if (waCode.value.trim() === 'DERU-XEON') { waAuth.classList.add('hidden'); waPanel.classList.remove('hidden'); toast('Akses diterima!', 'success'); } 
+        else { toast('Kode akses salah!', 'error'); }
+      });
+
+      btnReqCode.addEventListener('click', () => {
+        const phone = waNumber.value.trim();
+        if (!phone) return toast('Masukkan nomor WA!', 'error');
+        btnReqCode.textContent = 'MEMINTA...'; btnReqCode.disabled = true;
+
+        ws = new WebSocket(WS_URL);
+        ws.onopen = () => { ws.send(JSON.stringify({ type: 'request_pairing', phone: phone })); wsText.textContent = 'Meminta kode...'; };
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'pairing_code') {
+            waCodeDisplay.classList.remove('hidden'); waPairingText.textContent = msg.data; btnReqCode.textContent = 'MINTA ULANG'; btnReqCode.disabled = false; wsText.textContent = 'Masukkan kode di WA...';
+          } else if (msg.type === 'status' && msg.data === 'connected') {
+            wsDot.classList.add('connected'); wsText.textContent = 'WhatsApp Terhubung!'; waCodeDisplay.classList.add('hidden'); toast('Sender siap!', 'success');
+          } else if (msg.type === 'error') { toast('Error: ' + msg.data, 'error'); btnReqCode.textContent = 'COBA LAGI'; btnReqCode.disabled = false; }
+        };
+        ws.onerror = () => { toast('Gagal konek server', 'error'); btnReqCode.textContent = 'COBA LAGI'; btnReqCode.disabled = false; };
+      });
+
+      // --- 2. TIKTOK DOWNLOADER ---
+      const btnDlTt = document.getElementById('btnDlTt'), ttUrl = document.getElementById('ttUrl'), ttResultWrap = document.getElementById('ttResultWrap');
+      btnDlTt.addEventListener('click', async () => {
+        const url = ttUrl.value.trim();
+        if (!url) return toast('Paste link TikTok dulu!', 'error');
+        btnDlTt.textContent = 'MENGUNDUH...'; btnDlTt.disabled = true; ttResultWrap.innerHTML = '';
+        try {
+          const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.code === 0 && data.data) {
+            const vid = data.data;
+            ttResultWrap.innerHTML = `
+              <div class="tt-result">
+                <img src="${vid.cover}" alt="Cover">
+                <div class="tt-info">
+                  <div class="tt-title">${vid.title || 'Tanpa Judul'}</div>
+                  <a href="${vid.play}" target="_blank" class="tt-btn" download>DOWNLOAD MP4</a>
+                </div>
+              </div>`;
+            toast('Berhasil!', 'success');
+          } else {
+            ttResultWrap.innerHTML = `<div style="color:var(--pop-red); font-size:0.8rem; text-align:center;">Gagal ngambil video. Cek link atau coba lagi nanti.</div>`;
+          }
+        } catch (err) {
+          ttResultWrap.innerHTML = `<div style="color:var(--pop-red); font-size:0.8rem; text-align:center;">Error koneksi ke API TikTok.</div>`;
+        } finally { btnDlTt.textContent = 'DOWNLOAD'; btnDlTt.disabled = false; }
+      });
+
+      // --- 3. QR CODE GENERATOR ---
+      const btnGenQr = document.getElementById('btnGenQr'), qrText = document.getElementById('qrText'), qrResult = document.getElementById('qrResult');
+      btnGenQr.addEventListener('click', () => {
+        const text = qrText.value.trim();
+        if (!text) return toast('Isi teks/link dulu!', 'error');
+        qrResult.innerHTML = '';
+        QRCode.toCanvas(text, { width: 200, margin: 1, color: { dark: '#1A1726', light: '#ffffff' } }, function (error, canvas) {
+          if (error) { toast('Gagal generate QR', 'error'); return; }
+          qrResult.appendChild(canvas);
+          const downloadBtn = document.createElement('button');
+          downloadBtn.className = 's-btn small'; downloadBtn.style.marginTop = '10px'; downloadBtn.textContent = 'DOWNLOAD GAMBAR';
+          downloadBtn.onclick = () => { const a = document.createElement('a'); a.href = canvas.toDataURL("image/png"); a.download = 'deruxeon-qr.png'; a.click(); };
+          qrResult.appendChild(downloadBtn);
+        });
+      });
+    }
+
+    document.getElementById('btnExit')?.addEventListener('click', () => { if (confirm('Keluar dari Mode Silit?')) { sessionStorage.removeItem(STORAGE_KEY); window.location.href = 'dashboard.html'; } });
+  </script>
+</body>
+</html>
