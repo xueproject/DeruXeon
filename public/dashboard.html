@@ -255,6 +255,13 @@
     .btn-delete-story { background: var(--pop-red); color: #fff; padding: 6px 12px; border-radius: 16px; font-weight: 800; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px; }
     .close-story { position: absolute; top: 15px; right: 15px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.5); color: #fff; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem; z-index: 10; }
 
+    .btn-viewers {
+      background: rgba(255,255,255,0.2); color: #fff; padding: 6px 12px;
+      border-radius: 16px; font-weight: 700; font-size: 0.7rem;
+      display: inline-flex; align-items: center; gap: 4px; margin-top: 8px;
+      border: 1px solid rgba(255,255,255,0.4); cursor: pointer;
+    }
+
     /* BUBBLE NAV */
     .bubble-nav { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); width: calc(100% - 1.2rem); max-width: calc(var(--app-max-width) - 1.2rem); height: var(--nav-height); background: var(--nav-bg); border: var(--card-border); border-radius: 20px; box-shadow: var(--shadow-comic); display: flex; align-items: center; padding: 5px; z-index: 150; touch-action: none; user-select: none; backdrop-filter: blur(10px); }
     .bubble-indicator { position: absolute; top: 5px; height: calc(var(--nav-height) - 10px); border-radius: 14px; background: var(--pop-yellow); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s; pointer-events: none; z-index: 1; }
@@ -324,7 +331,8 @@
       <img id="storyImage" class="story-img" src="" alt="Story">
       <div class="story-caption-box" id="storyCaptionBox">
         <div class="story-caption" id="storyCaption"></div>
-        <button class="btn-delete-story hidden" id="btnDeleteStory" onclick="deleteStory()">Hapus Story</button>
+        <button class="btn-delete-story hidden" id="btnDeleteStory" onclick="deleteStory()" style="margin-right:5px;">Hapus Story</button>
+        <button class="btn-viewers hidden" id="btnViewers" onclick="openStoryViewers()">Dilihat oleh...</button>
       </div>
     </div>
   </div>
@@ -581,9 +589,8 @@
     }
     function sanitizeUrl(url) {
       if (!url) return '';
-      // Hanya izinkan URL http, https, dan data:image
       if (/^(https?:\/\/|data:image\/)/i.test(url)) return url;
-      return ''; // Tolak URL berbahaya (javascript:, vbscript:, dll)
+      return '';
     }
     
     function timeAgo(ts) { const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000); if (diff < 60) return 'baru saja'; if (diff < 3600) return Math.floor(diff/60) + 'm'; if (diff < 86400) return Math.floor(diff/3600) + 'j'; return Math.floor(diff/86400) + 'h'; }
@@ -615,8 +622,10 @@
     function initTheme() { const saved = localStorage.getItem('dx_theme') || 'light'; applyTheme(saved); }
     document.querySelectorAll('.theme-btn').forEach(btn => { btn.addEventListener('click', () => { applyTheme(btn.dataset.setTheme); toast(`Tema: ${btn.dataset.setTheme.toUpperCase()}`, 'success'); }); });
 
-    // Notif Badge handler
-    function updateNotifBadge() {
+    // NOTIF BADGE HANDLER
+    async function updateUnreadCount() {
+      const { count } = await supaClient.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', currentUser.id).or('is_read.eq.false,is_read.is.null');
+      unreadCount = count || 0;
       const badge = document.getElementById('navNotif');
       if (unreadCount > 0) {
         badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
@@ -638,11 +647,8 @@
         if(target === 'global') { const gm = document.getElementById('globalMessages'); gm.scrollTop = gm.scrollHeight; }
         if(target === 'discovery') { loadDiscoveryUsers(); }
         
-        // Mark as read jika buka chat
-        if(target === 'chat') {
-          unreadCount = 0;
-          updateNotifBadge();
-        }
+        // Refresh notif pas buka tab chat
+        if(target === 'chat') { updateUnreadCount(); }
       });
     });
 
@@ -768,7 +774,7 @@
           html += stories.map(s => {
             const author = pMap[s.user_id] || 'User';
             const mediaUrl = sanitizeUrl(s.media_url);
-            if(!mediaUrl) return ''; // Skip if URL malicious
+            if(!mediaUrl) return '';
             
             return `<div class="story-item" onclick="viewStory('${s.id}', '${mediaUrl}', '${escapeHtml(s.caption||'')}', '${s.user_id}')"><div class="story-circle"><img src="${mediaUrl}" alt="Story"></div><div class="story-name">${escapeHtml(author)}</div></div>`;
           }).join('');
@@ -790,19 +796,59 @@
       reader.readAsDataURL(file); e.target.value = '';
     });
 
-    window.viewStory = (id, url, caption, ownerId) => {
+    // UPDATE: View Story Logic (Nyatet penonton)
+    window.viewStory = async (id, url, caption, ownerId) => {
       activeStoryId = id;
       document.getElementById('storyImage').src = url;
       document.getElementById('storyCaption').textContent = caption || '';
-      if (ownerId === currentUser.id) document.getElementById('btnDeleteStory').classList.remove('hidden');
-      else document.getElementById('btnDeleteStory').classList.add('hidden');
+      
+      // Cek kalo ini story kita
+      if (ownerId === currentUser.id) {
+        document.getElementById('btnDeleteStory').classList.remove('hidden');
+        document.getElementById('btnViewers').classList.remove('hidden');
+      } else {
+        document.getElementById('btnDeleteStory').classList.add('hidden');
+        document.getElementById('btnViewers').classList.add('hidden');
+        
+        // Kalo bukan story kita, catat sebagai penonton (Upsert biar gak error duplicate)
+        supaClient.from('story_views').upsert({ story_id: id, user_id: currentUser.id }, { onConflict: 'story_id,user_id' }).then();
+      }
+      
       document.getElementById('storyModal').classList.add('show');
     };
+    
     window.closeStory = () => { document.getElementById('storyModal').classList.remove('show'); activeStoryId = null; };
     window.deleteStory = async () => {
       if (!activeStoryId) return; if (!confirm("Hapus story ini?")) return;
       await supaClient.from('stories').delete().eq('id', activeStoryId).eq('user_id', currentUser.id);
       toast('Story dihapus!', 'success'); closeStory(); loadStories();
+    };
+
+    // FITUR BARU: Liat siapa aja yang liat story
+    window.openStoryViewers = async () => {
+      if (!activeStoryId) return;
+      const listDiv = document.getElementById('listUsers');
+      const modal = document.getElementById('listModal');
+      const title = document.getElementById('listTitle');
+      
+      title.textContent = 'Dilihat Oleh';
+      modal.classList.add('show');
+      listDiv.innerHTML = '<div style="text-align:center; font-size:0.7rem; color:var(--color-text-muted);">Memuat...</div>';
+
+      const { data: views } = await supaClient.from('story_views').select('user_id').eq('story_id', activeStoryId);
+      
+      if (!views || views.length === 0) {
+        listDiv.innerHTML = '<div style="text-align:center; font-size:0.7rem; color:var(--color-text-muted);">Belum ada yang lihat.</div>';
+        return;
+      }
+
+      const userIds = views.map(v => v.user_id);
+      const { data: profiles } = await supaClient.from('profiles').select('*').in('id', userIds);
+      
+      listDiv.innerHTML = profiles.map(u => {
+        const imgHtml = u.avatar_url ? `<img src="${sanitizeUrl(u.avatar_url)}">` : escapeHtml(u.nickname.charAt(0).toUpperCase());
+        return `<div class="user-row" onclick="closeListAndOpenProfile('${u.id}')"><div class="user-avatar-sm">${imgHtml}</div><div class="user-info-sm" style="flex:1;"><div class="user-name-sm">${escapeHtml(u.nickname)} ${getBadgeHtml(u)}</div><div class="user-sub-sm">${sanitizeRole(u.role)}</div></div></div>`;
+      }).join('');
     };
 
     const composerText = document.getElementById('composerText');
@@ -1069,16 +1115,15 @@
       }).join('');
     }
 
-    window.openChat = (id, nick) => {
+    window.openChat = async (id, nick) => {
       activeChatUser = { id, nick };
       document.getElementById('chatListView').classList.add('hidden');
       document.getElementById('chatView').classList.remove('hidden');
       document.getElementById('chatName').textContent = nick;
       
-      // Mark as read kalo lagi buka chat ini
-      unreadCount = 0;
-      updateNotifBadge();
-      supaClient.from('messages').update({ is_read: true }).eq('receiver_id', currentUser.id).eq('sender_id', id).then();
+      // Tandai pesan dari orang ini sebagai dibaca
+      await supaClient.from('messages').update({ is_read: true }).eq('receiver_id', currentUser.id).eq('sender_id', id);
+      updateUnreadCount();
       
       loadMessages();
     };
@@ -1087,6 +1132,7 @@
       document.getElementById('chatView').classList.add('hidden');
       document.getElementById('chatListView').classList.remove('hidden');
       activeChatUser = null;
+      updateUnreadCount();
     });
 
     async function loadMessages() {
@@ -1337,10 +1383,8 @@
         safeSetText('apiKeyText', storedApi);
         safeSetText('apiIpText', `103.152.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
 
-        // Fetch Unread Chat untuk pertama kali
-        const { count } = await supaClient.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', currentUser.id).eq('is_read', false);
-        unreadCount = count || 0;
-        updateNotifBadge();
+        // Fetch Unread Chat Awal
+        await updateUnreadCount();
 
         initTheme(); startClock();
         
@@ -1356,19 +1400,14 @@
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
             const newMsg = payload.new;
             
-            // Cek apakah pesan ini buat user yang lagi login
             if (newMsg.receiver_id === currentUser.id) {
-              // Kalau lagi buka chat sama dia, langsung mark read & load
               if (activeChatUser && activeChatUser.id === newMsg.sender_id && !document.getElementById('chatView').classList.contains('hidden')) {
                 loadMessages();
                 supaClient.from('messages').update({ is_read: true }).eq('id', newMsg.id).then();
               } else {
-                // Kalau lagi gak buka chat, tambah notif
-                unreadCount++;
-                updateNotifBadge();
+                updateUnreadCount(); // Panggil ulang fungsi hitung biar akurat
               }
             } 
-            // Kalau kita yang ngirim, update chat layar
             else if (newMsg.sender_id === currentUser.id && activeChatUser && activeChatUser.id === newMsg.receiver_id) {
               loadMessages();
             }
