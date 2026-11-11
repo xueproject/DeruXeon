@@ -1020,7 +1020,69 @@
       document.getElementById('userName').textContent = newNick;
       document.getElementById('greetTitle').textContent = `Halo, ${newNick}!`;
     });
+/* ============================================================
+   LOGIC STORY (YANG KETINGGALAN)
+   ============================================================ */
+async function loadStories() {
+  const container = document.getElementById('storyContainer');
+  let html = `
+    <div class="story-item" onclick="document.getElementById('storyUpload').click()">
+      <div class="story-circle add-new">+</div>
+      <div class="story-name">Buat Story</div>
+    </div>
+  `;
+  
+  try {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: stories, error } = await supaClient.from('stories').select('*, profiles(nickname)').gte('created_at', yesterday).order('created_at', { ascending: false });
+    if (error) throw error;
+    
+    if (stories && stories.length > 0) {
+      html += stories.map(s => {
+        const author = s.profiles?.nickname || 'User';
+        return `
+          <div class="story-item" onclick="viewStory('${s.id}', '${s.media_url}', '${escapeHtml(s.caption||'')}', '${s.user_id}')">
+            <div class="story-circle"><img src="${s.media_url}" alt="Story"></div>
+            <div class="story-name">${escapeHtml(author)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch(e) { console.error("Gagal load story", e); }
+  container.innerHTML = html;
+}
 
+document.getElementById('storyUpload').addEventListener('change', (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  if (file.size > 3 * 1024 * 1024) return toast('Maksimal foto 3MB', 'error');
+  
+  const caption = prompt("Masukkan caption story (opsional):");
+  if (caption === null) return;
+
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const { error } = await supaClient.from('stories').insert({ user_id: currentUser.id, media_url: reader.result, caption: caption.trim() });
+    if (error) return toast('Gagal upload story', 'error');
+    toast('Story berhasil diupload!', 'success'); loadStories();
+  };
+  reader.readAsDataURL(file); e.target.value = '';
+});
+
+window.viewStory = (id, url, caption, ownerId) => {
+  activeStoryId = id;
+  document.getElementById('storyImage').src = url;
+  document.getElementById('storyCaption').textContent = caption || '';
+  if (ownerId === currentUser.id) document.getElementById('btnDeleteStory').classList.remove('hidden');
+  else document.getElementById('btnDeleteStory').classList.add('hidden');
+  document.getElementById('storyModal').classList.add('show');
+};
+window.closeStory = () => { document.getElementById('storyModal').classList.remove('show'); activeStoryId = null; };
+
+window.deleteStory = async () => {
+  if (!activeStoryId) return; if (!confirm("Hapus story ini?")) return;
+  await supaClient.from('stories').delete().eq('id', activeStoryId).eq('user_id', currentUser.id);
+  toast('Story dihapus!', 'success'); closeStory(); loadStories();
+};
     /* BOOT */
     async function boot() {
       const ok = await initSupa();
