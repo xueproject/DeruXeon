@@ -715,10 +715,18 @@
       let html = `<div class="story-item" onclick="document.getElementById('storyUpload').click()"><div class="story-circle add-new">+</div><div class="story-name">Buat</div></div>`;
       try {
         const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        const { data: stories } = await supaClient.from('stories').select('*, profiles(nickname)').gte('created_at', yesterday).order('created_at', { ascending: false });
+        // TANPA JOIN
+        const { data: stories, error } = await supaClient.from('stories').select('*').gte('created_at', yesterday).order('created_at', { ascending: false });
+        if (error) throw error;
+
         if (stories && stories.length > 0) {
+          // Tarik data user secara terpisah
+          const userIds = [...new Set(stories.map(s => s.user_id))];
+          const { data: profiles } = await supaClient.from('profiles').select('id, nickname').in('id', userIds);
+          const pMap = {}; (profiles || []).forEach(p => pMap[p.id] = p.nickname);
+
           html += stories.map(s => {
-            const author = s.profiles?.nickname || 'User';
+            const author = pMap[s.user_id] || 'User';
             return `<div class="story-item" onclick="viewStory('${s.id}', '${s.media_url}', '${escapeHtml(s.caption||'')}', '${s.user_id}')"><div class="story-circle"><img src="${s.media_url}" alt="Story"></div><div class="story-name">${escapeHtml(author)}</div></div>`;
           }).join('');
         }
@@ -889,9 +897,15 @@
       if (el.classList.contains('show')) {
         const list = document.getElementById(`comment-list-${postId}`);
         list.innerHTML = '<div style="text-align:center; font-size:0.6rem; color:var(--color-text-muted);">Memuat...</div>';
-        const { data: comments } = await supaClient.from('comments').select('*, profiles(nickname)').eq('post_id', postId).order('created_at', { ascending: true });
+        // TANPA JOIN
+        const { data: comments } = await supaClient.from('comments').select('*').eq('post_id', postId).order('created_at', { ascending: true });
         if (!comments || comments.length === 0) { list.innerHTML = '<div style="text-align:center; font-size:0.6rem; color:var(--color-text-muted);">Belum ada komen.</div>'; return; }
-        list.innerHTML = comments.map(c => `<div class="comment-item"><b>${escapeHtml(c.profiles?.nickname || 'User')}</b><br>${escapeHtml(c.text)}</div>`).join('');
+        
+        const userIds = [...new Set(comments.map(c => c.user_id))];
+        const { data: profiles } = await supaClient.from('profiles').select('id, nickname').in('id', userIds);
+        const pMap = {}; (profiles || []).forEach(p => pMap[p.id] = p.nickname);
+
+        list.innerHTML = comments.map(c => `<div class="comment-item"><b>${escapeHtml(pMap[c.user_id] || 'User')}</b><br>${escapeHtml(c.text)}</div>`).join('');
       }
     };
 
@@ -972,11 +986,19 @@
       
       let data = [];
       if (type === 'followers') {
-        const { data: res } = await supaClient.from('follows').select('follower_id, profiles!follows_follower_id_fkey(*)').eq('following_id', userId);
-        data = res?.map(r => r.profiles) || [];
+        const { data: res } = await supaClient.from('follows').select('follower_id').eq('following_id', userId);
+        if (res && res.length > 0) {
+          const ids = res.map(r => r.follower_id);
+          const { data: profs } = await supaClient.from('profiles').select('*').in('id', ids);
+          data = profs || [];
+        }
       } else {
-        const { data: res } = await supaClient.from('follows').select('following_id, profiles!follows_following_id_fkey(*)').eq('follower_id', userId);
-        data = res?.map(r => r.profiles) || [];
+        const { data: res } = await supaClient.from('follows').select('following_id').eq('follower_id', userId);
+        if (res && res.length > 0) {
+          const ids = res.map(r => r.following_id);
+          const { data: profs } = await supaClient.from('profiles').select('*').in('id', ids);
+          data = profs || [];
+        }
       }
       
       if (data.length === 0) { listDiv.innerHTML = `<div style="text-align:center; font-size:0.7rem; color:var(--color-text-muted);">Belum ada.</div>`; return; }
@@ -992,7 +1014,7 @@
       openProfile(id);
     };
 
-    // PRIVATE CHAT LOGIC
+    // PRIVATE CHAT
     async function loadChatList() {
       const c = document.getElementById('chatList');
       const { data: profiles } = await supaClient.from('profiles').select('*').neq('id', currentUser.id).limit(50);
@@ -1056,11 +1078,10 @@
         attachChatEvents();
       }
     }
-    
     document.getElementById('chatSend').addEventListener('click', sendPrivateMessage);
     document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendPrivateMessage(); });
 
-    // GLOBAL CHAT LOGIC
+    // GLOBAL CHAT
     function attachChatEvents() {
       document.querySelectorAll('.msg').forEach(msgEl => {
         if (msgEl.dataset.bound) return;
@@ -1116,20 +1137,28 @@
     async function loadGlobalChat() {
       const c = document.getElementById('globalMessages');
       try {
-        const { data: msgs, error } = await supaClient.from('global_messages').select('*, profiles(nickname, badge_type, custom_title)').order('created_at', { ascending: true }).limit(50);
+        // TANPA JOIN
+        const { data: msgs, error } = await supaClient.from('global_messages').select('*').order('created_at', { ascending: true }).limit(50);
         if (error) throw error;
+        
         if (!msgs || msgs.length === 0) { c.innerHTML = `<div class="empty-state" style="margin:auto">Belum ada obrolan.</div>`; }
         else {
+          const userIds = [...new Set(msgs.map(m => m.user_id))];
+          const { data: profiles } = await supaClient.from('profiles').select('id, nickname, badge_type, custom_title').in('id', userIds);
+          const pMap = {}; (profiles || []).forEach(p => pMap[p.id] = p);
+
           c.innerHTML = msgs.map(m => {
             const isMe = m.user_id === currentUser.id;
-            const authorName = isMe ? 'Kamu' : (m.profiles?.nickname || 'User');
-            const showName = !isMe ? `<div class="msg-sender" onclick="openProfile('${m.user_id}')">${escapeHtml(authorName)} ${getBadgeHtml(m.profiles)}</div>` : '';
+            const prof = pMap[m.user_id] || {};
+            const authorName = isMe ? 'Kamu' : (prof.nickname || 'User');
+            const showName = !isMe ? `<div class="msg-sender" onclick="openProfile('${m.user_id}')">${escapeHtml(authorName)} ${getBadgeHtml(prof)}</div>` : '';
             const edited = m.is_edited ? '<span class="msg-edited">(diedit)</span>' : '';
             return `<div class="msg-wrap ${isMe ? 'me' : 'them'}"><div class="msg ${isMe ? 'me' : 'them'}" data-id="${m.id}" data-type="global" data-text="${escapeHtml(m.text)}">${showName}${escapeHtml(m.text)}${edited}<div class="msg-time">${getTimeNow(m.created_at)}</div></div></div>`;
           }).join('');
         }
         c.scrollTop = c.scrollHeight;
         attachChatEvents();
+        
         if (!globalChannel) {
           globalChannel = supaClient.channel('public:global_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'global_messages' }, async (payload) => {
@@ -1165,7 +1194,7 @@
     document.getElementById('globalSend').addEventListener('click', sendGlobalMessage);
     document.getElementById('globalInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendGlobalMessage(); });
 
-    // SETTING LOGIC
+    /* SETTING & PREMIUM BADGE LOGIC */
     document.getElementById('ppUpload').addEventListener('change', (e) => {
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader();
