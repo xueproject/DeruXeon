@@ -12,7 +12,7 @@
 
   <style>
     /* ============================================================
-       1. THEME ENGINE
+       THEME ENGINE
        ============================================================ */
     :root {
       --pop-yellow: #FFD93D; --pop-pink: #FF6B9D; --pop-blue: #4ECDC4; --pop-red: #FF5252; --pop-purple: #A78BFA;
@@ -22,7 +22,6 @@
       --transition-theme: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
     }
 
-    /* 1. CLASSIC */
     [data-theme="classic"] {
       --ink: #1A1A1A; --paper: #FFF8E7; --paper-dark: #F5EBD0; --color-text-muted: #5A5A5A;
       --card-bg: var(--paper); --card-border: 3px solid var(--ink); --shadow-comic: 5px 5px 0 var(--ink); --shadow-comic-sm: 3px 3px 0 var(--ink);
@@ -30,7 +29,6 @@
       --bg-img: radial-gradient(circle at 1px 1px, var(--halftone) 1px, transparent 0); --bg-size: 12px 12px;
     }
 
-    /* 2. BLUE GLASS */
     [data-theme="blueglass"] {
       --ink: #E0F2FE; --paper: #0F172A; --paper-dark: #1E293B; --color-text-muted: #94A3B8; --pop-yellow: #60A5FA;
       --card-bg: rgba(30, 41, 59, 0.6); --card-border: 1px solid rgba(96, 165, 250, 0.3);
@@ -39,7 +37,6 @@
       --bg-img: radial-gradient(circle at 50% 0%, #1e3a8a 0%, transparent 70%), radial-gradient(circle at 50% 100%, #312e81 0%, transparent 70%); --bg-size: 100% 100%;
     }
 
-    /* 3. IMYUT */
     [data-theme="imyut"] {
       --ink: #FFFFFF; --paper: #1A1A1A; --paper-dark: #2A2A2A; --color-text-muted: #CCCCCC;
       --card-bg: rgba(26, 26, 26, 0.75); --card-border: 2px solid var(--pop-pink); --shadow-comic: 0 8px 20px rgba(0,0,0,0.5); --shadow-comic-sm: 0 4px 10px rgba(0,0,0,0.3);
@@ -47,7 +44,6 @@
       --bg-img: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=430&auto=format&fit=crop'); --bg-size: cover;
     }
 
-    /* 4. COMIC PAPER */
     [data-theme="comic"] {
       --ink: #111; --paper: #FDF5E6; --paper-dark: #EADDCA; --color-text-muted: #444; --pop-yellow: #FCA311; --pop-pink: #E63946; --pop-blue: #457B9D;
       --card-bg: var(--paper); --card-border: 3px dashed var(--ink); --shadow-comic: 6px 6px 0 var(--ink); --shadow-comic-sm: 4px 4px 0 var(--ink);
@@ -56,7 +52,7 @@
     }
 
     /* ============================================================
-       2. BASE STYLES
+       BASE STYLES
        ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -77,11 +73,10 @@
     .badge-verified svg { width: 10px; height: 10px; stroke-width: 4; }
 
     /* ============================================================
-       3. LAYOUT & KOMPONEN
+       LAYOUT & KOMPONEN
        ============================================================ */
     .app-shell { width: 100%; max-width: var(--app-max-width); min-height: 100dvh; padding-inline: var(--app-pad); padding-top: var(--space-md); padding-bottom: calc(var(--nav-height) + var(--space-md)); display: flex; flex-direction: column; gap: var(--space-md); }
     
-    /* TOPBAR */
     .topbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
     .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .topbar-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--pop-blue); border: var(--card-border); box-shadow: var(--shadow-comic-sm); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.3rem; color: #111; flex-shrink: 0; }
@@ -93,7 +88,6 @@
     .icon-btn:active { transform: scale(0.92); }
     .icon-btn svg { width: 20px; height: 20px; }
 
-    /* PANELS */
     .main { flex: 1; display: flex; flex-direction: column; gap: var(--space-md); }
     .screen-panel { display: none; flex-direction: column; gap: var(--space-md); animation: fadeIn 0.3s ease; }
     .screen-panel.active { display: flex; }
@@ -116,7 +110,7 @@
     .section-head h2 { font-size: 1.1rem; }
     .section-body { padding: 16px; font-size: 0.82rem; color: var(--color-text-muted); text-align: center; }
 
-    /* CARD UMUM */
+    /* MENU CARD */
     .menu-card { background: var(--card-bg); border: var(--card-border); border-radius: 14px; box-shadow: var(--shadow-comic-sm); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
     .menu-card h3 { font-size: 1.2rem; }
     .menu-card p { font-size: 0.8rem; color: var(--color-text-muted); }
@@ -128,7 +122,7 @@
     .menu-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
     .menu-btn.danger { background: var(--pop-red); color: #fff; }
 
-    /* THEME SELECTOR UI */
+    /* THEME SELECTOR */
     .theme-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .theme-btn { padding: 14px; border-radius: 10px; border: var(--card-border); background: var(--paper-dark); color: var(--ink); font-weight: 800; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: var(--shadow-comic-sm); position: relative; }
     .theme-btn.active { border-color: var(--pop-blue); box-shadow: 0 0 0 3px var(--pop-blue); }
@@ -143,6 +137,7 @@
     .subtabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; }
     .subtab { flex-shrink: 0; padding: 9px 16px; border-radius: 10px; border: var(--card-border); background: var(--card-bg); color: var(--ink); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; box-shadow: var(--shadow-comic-sm); }
     .subtab.active { background: var(--pop-yellow); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); color: #111; }
+    
     .composer { background: var(--card-bg); border: var(--card-border); border-radius: 14px; box-shadow: var(--shadow-comic-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .composer-row { display: flex; gap: 10px; }
     .composer-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-blue); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.1rem; color: #111; flex-shrink: 0; }
@@ -152,6 +147,7 @@
     .media-btn svg { width: 16px; height: 16px; }
     .btn-post { padding: 8px 20px; border-radius: 10px; background: var(--pop-yellow); border: var(--card-border); box-shadow: var(--shadow-comic-sm); font-family: var(--font-display); font-size: 1rem; color: #111; }
     .btn-post:disabled { opacity: 0.5; }
+
     .post { background: var(--card-bg); border: var(--card-border); border-radius: 14px; box-shadow: var(--shadow-comic-sm); margin-bottom: 12px; overflow: hidden; }
     .post-head { display: flex; align-items: center; gap: 10px; padding: 12px; }
     .post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-pink); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.1rem; color: #111; flex-shrink: 0; }
@@ -160,24 +156,29 @@
     .post-meta { font-size: 0.65rem; color: var(--color-text-muted); }
     .post-body { padding: 0 12px 10px; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; }
     .post-body .hashtag { color: var(--pop-blue); font-weight: 800; }
+    
     .user-list { display: flex; flex-direction: column; gap: 8px; }
     .user-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card-bg); border: var(--card-border); border-radius: 12px; box-shadow: var(--shadow-comic-sm); cursor: pointer; }
     .user-avatar-sm { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-purple); border: var(--card-border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); color: #111; }
     .user-name-sm { font-weight: 800; font-size: 0.85rem; }
     .user-sub-sm { font-size: 0.65rem; color: var(--color-text-muted); }
-    .chat-view { display: flex; flex-direction: column; height: calc(100dvh - var(--nav-height) - 180px); background: var(--card-bg); border: var(--card-border); border-radius: 14px; overflow: hidden; }
+
+    /* CHAT BOX (PRIVATE & GLOBAL) */
+    .chat-view { display: flex; flex-direction: column; height: calc(100dvh - var(--nav-height) - 220px); background: var(--card-bg); border: var(--card-border); border-radius: 14px; overflow: hidden; }
     .chat-head { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--pop-blue); color: #111; border-bottom: var(--card-border); }
     .chat-back { background: rgba(0,0,0,0.1); width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .chat-back svg { width: 16px; height: 16px; }
     .chat-name { font-weight: 800; font-size: 0.9rem; }
     .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--paper-dark); }
-    .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; border: 2px solid var(--ink); }
+    .msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; border: 2px solid var(--ink); }
     .msg.me { align-self: flex-end; background: var(--pop-yellow); color: #111; border-bottom-right-radius: 4px; }
     .msg.them { align-self: flex-start; background: var(--card-bg); color: var(--ink); border-bottom-left-radius: 4px; }
-    .msg-time { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; }
+    .msg-sender { font-size: 0.65rem; font-weight: 800; color: var(--pop-pink); margin-bottom: 2px; }
+    .msg-time { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; text-align: right; }
     .chat-input { display: flex; gap: 8px; padding: 10px; border-top: var(--card-border); background: var(--card-bg); }
     .chat-input input { flex: 1; padding: 10px; border-radius: 20px; border: var(--card-border); background: var(--paper-dark); color: var(--ink); }
     .chat-send { width: 40px; height: 40px; border-radius: 50%; background: var(--pop-yellow); border: var(--card-border); color: #111; display: flex; align-items: center; justify-content: center; }
+    
     .empty-state { padding: 30px; text-align: center; border: 2px dashed var(--color-text-muted); border-radius: 14px; font-size: 0.8rem; color: var(--color-text-muted); }
     .search-wrap { position: relative; margin-bottom: 10px; }
     .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; color: var(--color-text-muted); }
@@ -238,18 +239,9 @@
           <span class="greet-badge" id="greetBadge">USER</span>
         </div>
         <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-            <div class="stat-num">0</div><div class="stat-lbl">Followers</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-            <div class="stat-num">0</div><div class="stat-lbl">Likes</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>
-            <div class="stat-num">0</div><div class="stat-lbl">Following</div>
-          </div>
+          <div class="stat-card"><div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-num">0</div><div class="stat-lbl">Followers</div></div>
+          <div class="stat-card"><div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="stat-num">0</div><div class="stat-lbl">Likes</div></div>
+          <div class="stat-card"><div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><div class="stat-num">0</div><div class="stat-lbl">Following</div></div>
         </div>
         <div class="section-block">
           <div class="section-head"><h2>Events</h2></div>
@@ -260,12 +252,16 @@
       <!-- 2. SOCIAL -->
       <section class="screen-panel" data-screen="social">
         <h1 class="page-title">Social</h1>
+        
+        <!-- SUBTABS -->
         <div class="subtabs" id="socialSubtabs">
           <button class="subtab active" data-subtab="feed">Feed</button>
-          <button class="subtab" data-subtab="chat">Chat</button>
+          <button class="subtab" data-subtab="chat">Private</button>
+          <button class="subtab" data-subtab="global">Global Chat</button>
           <button class="subtab" data-subtab="search">Cari</button>
         </div>
 
+        <!-- FEED -->
         <div id="sub-feed">
           <div class="composer">
             <div class="composer-row">
@@ -286,6 +282,7 @@
           <div id="postsContainer"><div class="empty-state">Memuat feed…</div></div>
         </div>
 
+        <!-- PRIVATE CHAT -->
         <div id="sub-chat" class="hidden">
           <div id="chatListView">
             <div class="user-list" id="chatList"><div class="empty-state">Memuat chat…</div></div>
@@ -305,6 +302,21 @@
           </div>
         </div>
 
+        <!-- GLOBAL CHAT -->
+        <div id="sub-global" class="hidden">
+          <div class="chat-view" style="height: calc(100dvh - var(--nav-height) - 200px);">
+            <div class="chat-head" style="background:var(--pop-purple); color:#fff; border-color:var(--ink);">
+              <div class="chat-name" style="width:100%; text-align:center;">🌍 Global Room</div>
+            </div>
+            <div class="chat-messages" id="globalMessages"><div class="empty-state">Memuat chat global…</div></div>
+            <div class="chat-input">
+              <input type="text" id="globalInput" placeholder="Kirim pesan ke semua orang..." autocomplete="off">
+              <button class="chat-send" id="globalSend"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEARCH -->
         <div id="sub-search" class="hidden">
           <div class="search-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -412,6 +424,7 @@
     let selectedMedia = null;
     let activeChatUser = null;
     let searchTimeout;
+    let globalChannel = null;
 
     /* ============================================================
        HELPERS
@@ -419,10 +432,8 @@
     let toastTimer;
     function toast(msg, type = '') {
       const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.className = 'toast show ' + type;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000);
+      el.textContent = msg; el.className = 'toast show ' + type;
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = 'toast ' + type, 3000);
     }
     function hideLoading() {
       const o = document.getElementById('loadingOverlay');
@@ -432,6 +443,9 @@
     function timeAgo(ts) {
       const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
       if (diff < 60) return 'baru saja'; if (diff < 3600) return Math.floor(diff/60) + 'm'; if (diff < 86400) return Math.floor(diff/3600) + 'j'; return Math.floor(diff/86400) + 'h';
+    }
+    function getTimeNow(ts) {
+      return new Date(ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     }
 
     /* ============================================================
@@ -455,7 +469,7 @@
     }
 
     /* ============================================================
-       TEMA & UI DASAR
+       TEMA & UI
        ============================================================ */
     function applyTheme(themeName) {
       document.documentElement.setAttribute('data-theme', themeName);
@@ -474,12 +488,11 @@
         const target = btn.dataset.setTheme;
         const isPrem = btn.dataset.premium === 'true';
         if (isPrem && (userRole !== 'premium' && userRole !== 'owner')) return toast('Tema ini khusus Premium / Owner!', 'error');
-        applyTheme(target);
-        toast(`Tema diubah ke ${target.toUpperCase()}`, 'success');
+        applyTheme(target); toast(`Tema diubah ke ${target.toUpperCase()}`, 'success');
       });
     });
 
-    // Subtab Logic
+    // Subtab Social
     document.querySelectorAll('#socialSubtabs .subtab').forEach(t => {
       t.addEventListener('click', () => {
         document.querySelectorAll('#socialSubtabs .subtab').forEach(x => x.classList.remove('active'));
@@ -487,7 +500,14 @@
         const target = t.dataset.subtab;
         document.getElementById('sub-feed').classList.toggle('hidden', target !== 'feed');
         document.getElementById('sub-chat').classList.toggle('hidden', target !== 'chat');
+        document.getElementById('sub-global').classList.toggle('hidden', target !== 'global');
         document.getElementById('sub-search').classList.toggle('hidden', target !== 'search');
+        
+        // Kalau masuk global chat, scroll ke bawah
+        if(target === 'global') {
+          const gm = document.getElementById('globalMessages');
+          gm.scrollTop = gm.scrollHeight;
+        }
       });
     });
 
@@ -507,7 +527,6 @@
         if (!animate) indicator.style.transition = 'none'; else indicator.style.transition = '';
         indicator.style.left = (itemRect.left - navRect.left) + 'px'; indicator.style.width = itemRect.width + 'px';
       }
-
       function setActive(index, animate = true) {
         if (index < 0) index = 0; if (index >= items.length) index = items.length - 1;
         activeIndex = index;
@@ -516,7 +535,6 @@
         panels.forEach(p => p.classList.toggle('active', p.dataset.screen === items[index].dataset.target));
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-
       function indexFromX(x) {
         const navRect = nav.getBoundingClientRect(); const relX = x - navRect.left;
         let closest = 0, minDist = Infinity;
@@ -526,14 +544,12 @@
         });
         return closest;
       }
-
       function previewBubble(x) {
         const index = indexFromX(x); if (index === activeIndex) return;
         const item = items[index]; if (!item) return;
         const navRect = nav.getBoundingClientRect(); const itemRect = item.getBoundingClientRect();
         indicator.style.left = (itemRect.left - navRect.left) + 'px'; indicator.style.width = itemRect.width + 'px';
       }
-
       function onStart(e) {
         if (e.type === 'mousedown' && e.button !== 0) return;
         const point = e.touches ? e.touches[0] : e;
@@ -548,7 +564,6 @@
         window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onEnd);
         window.addEventListener('touchmove', onMove, { passive: false }); window.addEventListener('touchend', onEnd); window.addEventListener('touchcancel', onEnd);
       }
-
       function onMove(e) {
         const point = e.touches ? e.touches[0] : e; const dx = point.clientX - startX;
         if (!isLongPress && Math.abs(dx) > 8) {
@@ -557,7 +572,6 @@
         }
         if (isLongPress) { if (e.cancelable) e.preventDefault(); currentX = point.clientX; previewBubble(currentX); }
       }
-
       function onEnd() {
         clearTimeout(longPressTimer); items.forEach(it => it.classList.remove('pressing'));
         window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onEnd);
@@ -565,14 +579,13 @@
         if (isLongPress) { setActive(indexFromX(currentX)); nav.classList.remove('dragging'); }
         else { const t = indexFromX(startX); if (t !== activeIndex) setActive(t); }
       }
-
       nav.addEventListener('mousedown', onStart); nav.addEventListener('touchstart', onStart, { passive: false });
       nav.addEventListener('contextmenu', e => e.preventDefault()); window.addEventListener('resize', () => positionIndicator(activeIndex, false));
       setTimeout(() => positionIndicator(activeIndex, false), 100);
     })();
 
     /* ============================================================
-       LOGIC SOSIAL
+       LOGIC FEED
        ============================================================ */
     const composerText = document.getElementById('composerText');
     const btnPost = document.getElementById('btnPost');
@@ -625,6 +638,9 @@
       } catch(e) { c.innerHTML = `<div class="empty-state">Gagal memuat feed.</div>`; }
     }
 
+    /* ============================================================
+       LOGIC PRIVATE CHAT
+       ============================================================ */
     async function loadChatList() {
       const c = document.getElementById('chatList');
       try {
@@ -648,7 +664,7 @@
       try {
         const { data: msgs } = await supaClient.from('messages').select('*').or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${activeChatUser.id}),and(sender_id.eq.${activeChatUser.id},receiver_id.eq.${currentUser.id})`).order('created_at', { ascending: true }).limit(100);
         if (!msgs || msgs.length === 0) { c.innerHTML = `<div class="empty-state" style="margin:auto">Belum ada pesan.</div>`; return; }
-        c.innerHTML = msgs.map(m => { const isMe = m.sender_id === currentUser.id; const time = new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); return `<div class="msg ${isMe?'me':'them'}">${escapeHtml(m.text)}<div class="msg-time">${time}</div></div>`; }).join('');
+        c.innerHTML = msgs.map(m => { const isMe = m.sender_id === currentUser.id; return `<div class="msg ${isMe?'me':'them'}">${escapeHtml(m.text)}<div class="msg-time">${getTimeNow(m.created_at)}</div></div>`; }).join('');
         c.scrollTop = c.scrollHeight;
       } catch(e) { c.innerHTML = `<div class="empty-state" style="margin:auto">Gagal memuat pesan.</div>`; }
     }
@@ -663,6 +679,80 @@
     document.getElementById('chatSend').addEventListener('click', sendMessage);
     document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
+    /* ============================================================
+       LOGIC GLOBAL CHAT (REALTIME)
+       ============================================================ */
+    async function loadGlobalChat() {
+      const c = document.getElementById('globalMessages');
+      try {
+        // Ambil 50 pesan terakhir
+        const { data: msgs, error } = await supaClient.from('global_messages').select('*').order('created_at', { ascending: true }).limit(50);
+        if (error) throw error;
+        
+        if (!msgs || msgs.length === 0) {
+          c.innerHTML = `<div class="empty-state" style="margin:auto">Belum ada obrolan. Mulai sekarang!</div>`;
+        } else {
+          // Ambil data profile buat namanya
+          const userIds = [...new Set(msgs.map(m => m.user_id))];
+          const { data: profiles } = await supaClient.from('profiles').select('id, nickname').in('id', userIds);
+          const pMap = {}; (profiles||[]).forEach(p => pMap[p.id] = p.nickname);
+
+          c.innerHTML = msgs.map(m => {
+            const isMe = m.user_id === currentUser.id;
+            const authorName = isMe ? 'Kamu' : (pMap[m.user_id] || 'User');
+            const showName = !isMe ? `<div class="msg-sender">${escapeHtml(authorName)}</div>` : '';
+            return `<div class="msg ${isMe?'me':'them'}">${showName}${escapeHtml(m.text)}<div class="msg-time">${getTimeNow(m.created_at)}</div></div>`;
+          }).join('');
+        }
+        c.scrollTop = c.scrollHeight;
+
+        // Setup Realtime Listener biar auto update
+        if (!globalChannel) {
+          globalChannel = supaClient.channel('public:global_messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'global_messages' }, async (payload) => {
+              const newMsg = payload.new;
+              // Cek apakah tab global lagi kebuka
+              const isGlobalActive = !document.getElementById('sub-global').classList.contains('hidden');
+              if (!isGlobalActive) return;
+
+              // Cari nama user
+              const { data: prof } = await supaClient.from('profiles').select('nickname').eq('id', newMsg.user_id).maybeSingle();
+              const authorName = newMsg.user_id === currentUser.id ? 'Kamu' : (prof?.nickname || 'User');
+              const showName = newMsg.user_id !== currentUser.id ? `<div class="msg-sender">${escapeHtml(authorName)}</div>` : '';
+              
+              // Hapus empty state kalau ada
+              if (c.querySelector('.empty-state')) c.innerHTML = '';
+              
+              const msgHtml = `<div class="msg ${newMsg.user_id === currentUser.id ? 'me' : 'them'}">${showName}${escapeHtml(newMsg.text)}<div class="msg-time">${getTimeNow(newMsg.created_at)}</div></div>`;
+              c.insertAdjacentHTML('beforeend', msgHtml);
+              c.scrollTop = c.scrollHeight;
+            })
+            .subscribe();
+        }
+
+      } catch(e) { console.error(e); c.innerHTML = `<div class="empty-state" style="margin:auto">Gagal memuat chat global.</div>`; }
+    }
+
+    async function sendGlobalMessage() {
+      const input = document.getElementById('globalInput');
+      const txt = input.value.trim();
+      if (!txt) return;
+      
+      input.value = '';
+      const { error } = await supaClient.from('global_messages').insert({ user_id: currentUser.id, text: txt });
+      if (error) {
+        toast('Gagal kirim: ' + error.message, 'error');
+        return;
+      }
+      // Pesan akan otomatis muncul lewat listener Realtime di atas
+    }
+
+    document.getElementById('globalSend').addEventListener('click', sendGlobalMessage);
+    document.getElementById('globalInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendGlobalMessage(); });
+
+    /* ============================================================
+       SEARCH
+       ============================================================ */
     document.getElementById('searchInput').addEventListener('input', e => {
       clearTimeout(searchTimeout); const q = e.target.value.trim(); searchTimeout = setTimeout(() => doSearch(q), 400);
     });
@@ -678,7 +768,7 @@
           const { data: profiles } = await supaClient.from('profiles').select('id, nickname, role').ilike('nickname', `%${q}%`).limit(20);
           if (!profiles || profiles.length === 0) { c.innerHTML = `<div class="empty-state">User tidak ditemukan.</div>`; return; }
           c.innerHTML = `<div class="user-list">` + profiles.map(p => `<div class="user-row" data-id="${p.id}" data-nick="${escapeHtml(p.nickname)}"><div class="user-avatar-sm">${p.nickname.charAt(0).toUpperCase()}</div><div class="user-info-sm"><div class="user-name-sm">${escapeHtml(p.nickname)}</div><div class="user-sub-sm">${p.role||'user'}</div></div></div>`).join('') + `</div>`;
-          c.querySelectorAll('.user-row').forEach(r => { r.addEventListener('click', () => { document.querySelectorAll('#socialSubtabs .subtab').forEach(t=>t.classList.remove('active')); document.querySelector('[data-subtab="chat"]').classList.add('active'); document.getElementById('sub-feed').classList.add('hidden'); document.getElementById('sub-search').classList.add('hidden'); document.getElementById('sub-chat').classList.remove('hidden'); openChat(r.dataset.id, r.dataset.nick); }); });
+          c.querySelectorAll('.user-row').forEach(r => { r.addEventListener('click', () => { document.querySelectorAll('#socialSubtabs .subtab').forEach(t=>t.classList.remove('active')); document.querySelector('[data-subtab="chat"]').classList.add('active'); document.getElementById('sub-feed').classList.add('hidden'); document.getElementById('sub-global').classList.add('hidden'); document.getElementById('sub-search').classList.add('hidden'); document.getElementById('sub-chat').classList.remove('hidden'); openChat(r.dataset.id, r.dataset.nick); }); });
         }
       } catch(e) { c.innerHTML = `<div class="empty-state">Gagal mencari.</div>`; }
     }
@@ -687,19 +777,28 @@
        BOOT DASHBOARD
        ============================================================ */
     async function boot() {
+      console.log("1. Memulai Boot...");
       const ok = await initSupa();
-      if (!ok) { toast('Koneksi server gagal', 'error'); hideLoading(); return; }
+      if (!ok) { toast('Koneksi ke Supabase gagal. Periksa internet.', 'error'); hideLoading(); return; }
+      console.log("2. Supabase Client Siap.");
 
       try {
-        const { data: { session } } = await supaClient.auth.getSession();
+        const { data: { session }, error: sessionError } = await supaClient.auth.getSession();
+        if (sessionError) throw new Error("Session Error: " + sessionError.message);
         if (!session) { window.location.href = 'login.html'; return; }
         currentUser = session.user;
+        console.log("3. Sesi ditemukan:", currentUser.email);
 
-        const { data: profile } = await supaClient.from('profiles').select('nickname, role').eq('id', currentUser.id).maybeSingle();
+        const { data: profile, error: profileError } = await supaClient.from('profiles').select('nickname, role').eq('id', currentUser.id).maybeSingle();
+        if (profileError) console.warn("Gagal ambil profil:", profileError);
+
         userRole = profile?.role || 'user';
-        const nickname = profile?.nickname || currentUser.user_metadata?.nickname || 'User';
+        const nickname = profile?.nickname || currentUser.user_metadata?.nickname || currentUser.email.split('@')[0];
         
-        // --- SETUP TOPBAR & BADGE ---
+        // --- UPDATE UI ---
+        const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        const safeSetHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+
         let nameHtml = nickname;
         if (userRole === 'premium' || userRole === 'owner') {
           nameHtml += ` <span class="badge-verified"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>`;
@@ -707,52 +806,49 @@
           if(pText) { pText.textContent = "Kamu udah Premium! Semua fitur kebuka."; pText.style.color = "var(--ink)"; pText.style.fontWeight="900"; }
         }
 
-        document.getElementById('userAvatar').textContent = nickname.charAt(0).toUpperCase();
-        document.getElementById('userName').innerHTML = nameHtml;
-        document.getElementById('userRole').textContent = userRole.toUpperCase();
-        document.getElementById('greetTitle').innerHTML = `Halo, ${nameHtml}!`;
-        document.getElementById('greetBadge').textContent = userRole.toUpperCase();
-        document.getElementById('composerAvatar').textContent = nickname.charAt(0).toUpperCase();
+        safeSetText('userAvatar', nickname.charAt(0).toUpperCase());
+        safeSetHTML('userName', nameHtml);
+        safeSetText('userRole', userRole.toUpperCase());
+        safeSetHTML('greetTitle', `Halo, ${nameHtml}!`);
+        safeSetText('greetBadge', userRole.toUpperCase());
+        safeSetText('composerAvatar', nickname.charAt(0).toUpperCase());
 
-        // --- SETUP SETTINGS ---
         const rawEmail = currentUser.email || 'user@mail.com';
         const username = rawEmail.split('@')[0];
-        document.getElementById('setNickname').textContent = nickname; // Fallback
-        document.getElementById('setNicknameDisplay').textContent = nickname;
-        document.getElementById('setUsername').textContent = username;
-        document.getElementById('lockedUsername').textContent = username;
-        document.getElementById('setEmail').textContent = rawEmail;
-        document.getElementById('setRole').textContent = userRole.toUpperCase();
-        document.getElementById('inputNickname').value = nickname;
-        document.getElementById('ppAvatar').textContent = nickname.charAt(0).toUpperCase();
+        safeSetText('setNickname', nickname); safeSetText('setNicknameDisplay', nickname); safeSetText('setUsername', username);
+        safeSetText('lockedUsername', username); safeSetText('setEmail', rawEmail); safeSetText('setRole', userRole.toUpperCase());
+        
+        const inputNick = document.getElementById('inputNickname'); if(inputNick) inputNick.value = nickname;
+        safeSetText('ppAvatar', nickname.charAt(0).toUpperCase());
 
-        // API Generator
         let storedApi = localStorage.getItem('dx_api_key');
         if (!storedApi) { const r = Math.floor(100000 + Math.random() * 900000); storedApi = `DERU_MEMBER_XEON${r}-DX-ON`; localStorage.setItem('dx_api_key', storedApi); }
-        document.getElementById('apiKeyText').textContent = storedApi;
-        document.getElementById('apiIpText').textContent = `103.152.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+        safeSetText('apiKeyText', storedApi);
+        safeSetText('apiIpText', `103.152.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
 
-        document.getElementById('btnSaveNickname').addEventListener('click', async () => {
-          const newNick = document.getElementById('inputNickname').value.trim();
-          if (!newNick || newNick.length < 3) return toast('Nickname minimal 3 huruf', 'error');
-          document.getElementById('btnSaveNickname').textContent = '...';
-          const { error } = await supaClient.from('profiles').update({ nickname: newNick }).eq('id', currentUser.id);
-          document.getElementById('btnSaveNickname').textContent = 'SAVE';
-          if (error) return toast('Gagal update: ' + error.message, 'error');
-          toast('Nickname diubah!', 'success');
-          document.getElementById('setNicknameDisplay').textContent = newNick;
-          document.getElementById('ppAvatar').textContent = newNick.charAt(0).toUpperCase();
-          document.getElementById('userAvatar').textContent = newNick.charAt(0).toUpperCase();
-        });
+        const btnSave = document.getElementById('btnSaveNickname');
+        if(btnSave) {
+            btnSave.onclick = async () => {
+                const newNick = document.getElementById('inputNickname').value.trim();
+                if (!newNick || newNick.length < 3) return toast('Nickname minimal 3 huruf', 'error');
+                btnSave.textContent = '...';
+                const { error } = await supaClient.from('profiles').update({ nickname: newNick }).eq('id', currentUser.id);
+                btnSave.textContent = 'SAVE';
+                if (error) return toast('Gagal update: ' + error.message, 'error');
+                toast('Nickname diubah!', 'success');
+                safeSetText('setNicknameDisplay', newNick); safeSetText('ppAvatar', newNick.charAt(0).toUpperCase()); safeSetText('userAvatar', newNick.charAt(0).toUpperCase()); safeSetHTML('greetTitle', `Halo, ${newNick}!`);
+            };
+        }
 
-        // Inisialisasi Tema & Load Sosmed
         initTheme();
-        await Promise.all([loadFeed(), loadChatList()]);
+        loadFeed().catch(e => console.error("Feed Error:", e));
+        loadChatList().catch(e => console.error("Chat Error:", e));
+        loadGlobalChat().catch(e => console.error("Global Chat Error:", e));
 
       } catch (err) {
-        console.error(err); toast('Error memuat profil.', 'error');
+        console.error("CRITICAL BOOT ERROR:", err); toast('Error sistem: ' + err.message, 'error');
       } finally {
-        hideLoading();
+        hideLoading(); console.log("5. Boot Selesai.");
       }
     }
 
